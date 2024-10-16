@@ -6,6 +6,7 @@ Shader "Custom/ShapingFunctions" {
         _ColorHouse2 ("Color House 2", Color)  = (0.0, 0.0, 0.8, 1.0)
         _ColorSun ("Color Sun", Color)         = (0.8, 0.8, 0.0, 1.0)
         _ColorBack ("Color Background", Color) = (0.1, 0.0, 0.1, 1.0)
+        _ColorGlow ("Color Glow", Color)       = (0.1, 0.0, 0.1, 1.0)
     }
 
     SubShader {
@@ -18,7 +19,7 @@ Shader "Custom/ShapingFunctions" {
 
             #include "UnityCG.cginc"
 
-            float4 _ColorGround, _ColorHouse1, _ColorHouse2, _ColorSun, _ColorBack;
+            float4 _ColorGround, _ColorHouse1, _ColorHouse2, _ColorSun, _ColorBack, _ColorGlow;
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -56,6 +57,15 @@ Shader "Custom/ShapingFunctions" {
                 col += houseMask1 * _ColorHouse1;
                 col += houseMask2 * _ColorHouse2;
                 col += sunMask * _ColorSun;
+
+                // glow
+                float glowMask = 1 - pow(abs(i.uv.y * 1.0), 0.08);
+                glowMask *= (1 - groundMask) * (1 - houseMask1) * (1 - houseMask2);
+                col += glowMask * _ColorGlow;
+
+                // dark edges
+                i.uv.y -= 0.2;
+                col *= (1 - (length(i.uv * 0.6) - 0.1));
 
                 return col;
             }
