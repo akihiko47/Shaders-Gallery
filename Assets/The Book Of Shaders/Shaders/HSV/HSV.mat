@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Rainbow
-  m_Shader: {fileID: 4800000, guid: 8e3e5267344334a4094da610d9aef5b8, type: 3}
+  m_Name: HSV
+  m_Shader: {fileID: 4800000, guid: 0a1dcc32eed3996489821cfb97a222d5, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -78,15 +78,7 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Blue: {r: 0.5778246, g: 0.53396225, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Green: {r: 0.4562655, g: 1, b: 0.4509434, a: 1}
-    - _Orange: {r: 1, g: 0.80059, b: 0.28490567, a: 1}
-    - _Purple: {r: 1, g: 0.42830187, b: 0.8094339, a: 1}
-    - _Red: {r: 1, g: 0.4585607, b: 0.390566, a: 1}
-    - _Red1: {r: 1, g: 0, b: 0, a: 1}
-    - _Red2: {r: 1, g: 0, b: 0, a: 1}
     - _Tint: {r: 0.99607843, g: 0.68235296, b: 0.20392157, a: 1}
-    - _Yellow: {r: 1, g: 0.9733485, b: 0.435849, a: 1}
   m_BuildTextureStacks: []
