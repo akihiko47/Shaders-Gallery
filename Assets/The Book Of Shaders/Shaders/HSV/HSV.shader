@@ -50,9 +50,12 @@ Shader "Custom/HSV" {
                 float dist = saturate(length(normUV));
                 float angle = (atan2(normUV.y, normUV.x) / TWO_PI) + 0.5;
 
+                clip(dist - 0.3);
+                clip(0.999 - dist);
+
                 float3 col = hsb2rgb(float3(angle + _Time.y * 0.2, dist, 1.0));
 
-                col *= (dist > 0.3) * (dist < 1.0);
+                col *= (dist > 0.4) * (dist < 0.9);
 
                 return pow(float4(col, 1.0), 2.2);
             }
