@@ -61,6 +61,9 @@ Shader "Custom/SDF" {
 
                 i.uv = i.uv * 2.0 - 1.0;
 
+                i.uv = abs(i.uv) - 0.3;
+
+
                 float ssdf = sdfCoolS(rotate(i.uv * 1.5, -_Time.y));
 
                 float3 col = float(step(ssdf, -0.02) * step(-ssdf, 0.05)) * _ColorS;
