@@ -54,7 +54,7 @@ Shader "Custom/Radar" {
                 float r = length(uvNorm);
                 float a = (atan2(-uvNorm.x, -uvNorm.y) / TWO_PI) + 0.5;
 
-                float2 uvNormR = rotate(uvNorm, -_Time.y * 0.8);  // rotated normalized uv
+                float2 uvNormR = rotate(uvNorm, -_Time.y);  // rotated normalized uv
                 float ra = (atan2(-uvNormR.x, -uvNormR.y) / TWO_PI) + 0.5;  // rotated angle
 
                 float3 col = float3(0.0, 0.0, 0.0);
@@ -84,6 +84,25 @@ Shader "Custom/Radar" {
                 // gradient behind line
                 float gradLine = saturate(smoothstep(0.55, 0.995, ra) * (r <= mainCircleR) * (1 - mainCircle) * (1 - dotCenter));
                 col += gradLine * _ColMed * 0.15;
+
+                // cross
+                float2 uvCross = rotate(uvNorm, PI / 4);
+                float dfcross = min(abs(uvCross).x, abs(uvCross).y);
+                float cross = step(dfcross, 0.003) * (r <= mainCircleR);
+                col += cross * _ColDark * 1.2;
+
+                // lines
+                float lines = step((sin(r * PI * 14.4) + 1) * 0.5, 0.01) * (r <= mainCircleR);
+                col += lines * _ColDark;
+
+                // noise background
+                float noise = ((sin(i.uv.x * PI * 3.5) + 1) * 0.5) * ((cos(i.uv.y * PI * 3.0) + 1) * 0.5) +
+                              ((sin(i.uv.x * PI * 4.0) + 1) * 0.5) * ((cos(i.uv.y * PI * 6.0) + 1) * 0.5) * 0.7 +
+                              ((sin(i.uv.x * PI * 12.0) + 1) * 0.5) * ((cos(i.uv.y * PI * 16.0) + 1) * 0.5) * 0.4 + 
+                              ((sin(i.uv.x * PI * 15.0) + 1) * 0.5) * ((cos(i.uv.y * PI * 25.0) + 1) * 0.5) * 0.1;
+                noise = (step(noise, 0.5) - step(noise, 0.45)) * (r <= mainCircleR);
+                col += noise * _ColDark;
+
 
                 return float4(col, 1.0);
             }
