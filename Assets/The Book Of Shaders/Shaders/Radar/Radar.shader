@@ -35,6 +35,10 @@ Shader "Custom/Radar" {
                 return length(p) - r;
             }
 
+            float2 rotate(float2 uv, float th){
+                return mul(float2x2(cos(th), sin(th), -sin(th), cos(th)), uv);
+            }
+
             v2f vert (appdata v) {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -46,8 +50,12 @@ Shader "Custom/Radar" {
 
                 // coordinates
                 float2 uvNorm = i.uv * 2.0 - 1.0;
+                
                 float r = length(uvNorm);
                 float a = (atan2(-uvNorm.x, -uvNorm.y) / TWO_PI) + 0.5;
+
+                float2 uvNormR = rotate(uvNorm, -_Time.y * 0.8);  // rotated normalized uv
+                float ra = (atan2(-uvNormR.x, -uvNormR.y) / TWO_PI) + 0.5;  // rotated angle
 
                 float3 col = float3(0.0, 0.0, 0.0);
 
@@ -70,9 +78,12 @@ Shader "Custom/Radar" {
                 col += dotCenter * _ColBright;
 
                 // rotating line
-                float la = frac(_Time.y * 0.2);  // line angle
-                float rotLine = (smoothstep(la + 0.005, la, a) - smoothstep(la, la - 0.005, a)) * (r <= mainCircleR) * (1 - mainCircle) * (1 - dotCenter);
+                float rotLine = (smoothstep(1.0, 0.995, ra) - smoothstep(0.995, 0.99, ra)) * (r <= mainCircleR) * (1 - mainCircle) * (1 - dotCenter);
                 col += rotLine * _ColBright;
+
+                // gradient behind line
+                float gradLine = saturate(smoothstep(0.55, 0.995, ra) * (r <= mainCircleR) * (1 - mainCircle) * (1 - dotCenter));
+                col += gradLine * _ColMed * 0.15;
 
                 return float4(col, 1.0);
             }
