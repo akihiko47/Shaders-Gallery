@@ -79,7 +79,7 @@ Shader "Custom/Radar" {
                 col += glowInner * _ColDark * 1.5;
 
                 // outer glow
-                float glowOuter = saturate(0.0015 / sdMainCircle);
+                float glowOuter = saturate(0.002 / sdMainCircle);
                 col += glowOuter * _ColBright * (1 - mainCircle);
 
                 // dot center
@@ -139,12 +139,20 @@ Shader "Custom/Radar" {
                 // target circle
                 float tCircleR = 0.02 + frac(_Time.y) * 0.13;
                 float tCircleDf = sdCircle(targetUV, 0.1);
-                float tCircle = smoothstep(tCircleR, tCircleR - 0.005, tCircleDf) - smoothstep(tCircleR - 0.01, tCircleR - 0.05, tCircleDf);
+                float tCircle = smoothstep(tCircleR, tCircleR - 0.003, tCircleDf) - smoothstep(tCircleR - 0.005, tCircleR - 0.05, tCircleDf);
 
                 tCircle *= (1.0 - pow(frac(_Time.y), 0.5));   // fade at the end
                 tCircle *= (int(_Time.y) % 2 == 0.0);         // add pause
                 tCircle *= (r < mainCircleR);                 // only inside main circle
                 col += tCircle * _ColBright;
+
+                // glass reflection flare
+                float flare = pow(saturate(uvNorm.y), 2.5) * (r < mainCircleR);
+                col += flare * _ColBright * 0.2;
+
+                // bottom shadow
+                float shadow = pow(saturate(-uvNorm.y), 2.5) * (r < mainCircleR);
+                col -= shadow * 0.015;
 
                 return float4(col, 1.0);
             }
