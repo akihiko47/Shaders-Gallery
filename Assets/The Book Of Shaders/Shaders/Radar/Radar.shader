@@ -39,6 +39,15 @@ Shader "Custom/Radar" {
                 return mul(float2x2(cos(th), sin(th), -sin(th), cos(th)), uv);
             }
 
+            float sdTriangle(in float2 p, in float r){
+                const float k = sqrt(3.0);
+                p.x = abs(p.x) - r;
+                p.y = p.y + r / k;
+                if(p.x + k * p.y > 0.0) p = float2(p.x - k * p.y, -k * p.x - p.y) / 2.0;
+                p.x -= clamp(p.x, -2.0 * r, 0.0);
+                return -length(p) * sign(p.y);
+            }
+
             v2f vert (appdata v) {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -54,7 +63,7 @@ Shader "Custom/Radar" {
                 float r = length(uvNorm);
                 float a = (atan2(-uvNorm.x, -uvNorm.y) / TWO_PI) + 0.5;
 
-                float2 uvNormR = rotate(uvNorm, -_Time.y);  // rotated normalized uv
+                float2 uvNormR = rotate(uvNorm, -_Time.y);                  // rotated normalized uv
                 float ra = (atan2(-uvNormR.x, -uvNormR.y) / TWO_PI) + 0.5;  // rotated angle
 
                 float3 col = float3(0.0, 0.0, 0.0);
@@ -107,9 +116,35 @@ Shader "Custom/Radar" {
 
                 // edge strips
                 float stripsWave = 1 - (smoothstep(0.0, 0.05, ra) - smoothstep(0.95, 1.0, ra));
-                float strips = step(sin(a * PI * 180.0) * 0.5 + 0.5, 0.03) * (r > mainCircleR) * (r < mainCircleR + 0.03 + stripsWave * 0.05) * (1 - mainCircle);
+                float strips = step(sin(a * PI * 180.0) * 0.5 + 0.5, 0.04) * (r > mainCircleR) * (r < mainCircleR + 0.03 + stripsWave * 0.05) * (1 - mainCircle);
                 col += strips * _ColMed;
 
+                // triangles
+                float dspt = (sin(_Time.y * 3.0) * 0.5 + 0.5) * 0.035;  // move triangles with time
+                float triangles =  
+                    //        edge smoothnes                           displacement from center               rotation    size
+                    smoothstep(0.005, 0.0, sdTriangle(rotate(float2(uvNorm.x, uvNorm.y - mainCircleR + 0.05 + dspt), PI       ), 0.03)) +
+                    smoothstep(0.005, 0.0, sdTriangle(rotate(float2(uvNorm.x, uvNorm.y + mainCircleR - 0.05 - dspt), 0.0      ), 0.03)) +
+                    smoothstep(0.005, 0.0, sdTriangle(rotate(float2(uvNorm.x - mainCircleR + 0.05 + dspt, uvNorm.y), PI * 0.5 ), 0.03)) +
+                    smoothstep(0.005, 0.0, sdTriangle(rotate(float2(uvNorm.x + mainCircleR - 0.05 - dspt, uvNorm.y), PI * -0.5), 0.03)) ;
+                col += triangles * _ColBright;
+
+                // target cross
+                float2 targetPos = float2(sin(_Time.y * 0.25) * 0.3 + 0.15, cos(_Time.y * 0.1) * 0.3 + 0.15);
+                float2 targetUV = rotate(uvNorm - targetPos, -_Time.y);
+                float dfTargetCross = min(abs(targetUV).x, abs(targetUV).y);
+                float targetCross = (smoothstep(0.011, 0.01, dfTargetCross) - smoothstep(0.004, 0.003, dfTargetCross)) * (length(targetUV) < 0.03) * (r < mainCircleR);
+                col += targetCross * _ColBright;
+
+                // target circle
+                float tCircleR = 0.02 + frac(_Time.y) * 0.13;
+                float tCircleDf = sdCircle(targetUV, 0.1);
+                float tCircle = smoothstep(tCircleR, tCircleR - 0.005, tCircleDf) - smoothstep(tCircleR - 0.01, tCircleR - 0.05, tCircleDf);
+
+                tCircle *= (1.0 - pow(frac(_Time.y), 0.5));   // fade at the end
+                tCircle *= (int(_Time.y) % 2 == 0.0);         // add pause
+                tCircle *= (r < mainCircleR);                 // only inside main circle
+                col += tCircle * _ColBright;
 
                 return float4(col, 1.0);
             }
