@@ -70,7 +70,7 @@ Shader "Custom/Radar" {
                 col += glowInner * _ColDark * 1.5;
 
                 // outer glow
-                float glowOuter = saturate(0.001 / sdMainCircle);
+                float glowOuter = saturate(0.0015 / sdMainCircle);
                 col += glowOuter * _ColBright * (1 - mainCircle);
 
                 // dot center
@@ -96,12 +96,19 @@ Shader "Custom/Radar" {
                 col += lines * _ColDark;
 
                 // noise background
-                float noise = ((sin(i.uv.x * PI * 3.5) + 1) * 0.5) * ((cos(i.uv.y * PI * 3.0) + 1) * 0.5) +
-                              ((sin(i.uv.x * PI * 4.0) + 1) * 0.5) * ((cos(i.uv.y * PI * 6.0) + 1) * 0.5) * 0.7 +
-                              ((sin(i.uv.x * PI * 12.0) + 1) * 0.5) * ((cos(i.uv.y * PI * 16.0) + 1) * 0.5) * 0.4 + 
-                              ((sin(i.uv.x * PI * 15.0) + 1) * 0.5) * ((cos(i.uv.y * PI * 25.0) + 1) * 0.5) * 0.1;
+                float2 uvNoise = i.uv;
+                uvNoise.y += _Time.y * 0.03;
+                float noise = ((sin(uvNoise.x * PI * 3.5) + 1) * 0.5) * ((cos(uvNoise.y * PI * 3.0) + 1) * 0.5) +
+                              ((sin(uvNoise.x * PI * 4.0) + 1) * 0.5) * ((cos(uvNoise.y * PI * 6.0) + 1) * 0.5) * 0.7 +
+                              ((sin(uvNoise.x * PI * 12.0) + 1) * 0.5) * ((cos(uvNoise.y * PI * 16.0) + 1) * 0.5) * 0.4 +
+                              ((sin(uvNoise.x * PI * 15.0) + 1) * 0.5) * ((cos(uvNoise.y * PI * 25.0) + 1) * 0.5) * 0.1;
                 noise = (step(noise, 0.5) - step(noise, 0.45)) * (r <= mainCircleR);
                 col += noise * _ColDark;
+
+                // edge strips
+                float stripsWave = 1 - (smoothstep(0.0, 0.05, ra) - smoothstep(0.95, 1.0, ra));
+                float strips = step(sin(a * PI * 180.0) * 0.5 + 0.5, 0.03) * (r > mainCircleR) * (r < mainCircleR + 0.03 + stripsWave * 0.05) * (1 - mainCircle);
+                col += strips * _ColMed;
 
 
                 return float4(col, 1.0);
