@@ -107,10 +107,20 @@ Shader "Custom/HexGrid" {
                 col += saturate(0.005 / (hex.d)) * _ColGlow * (1.0 - pulse);
 
                 // flare
-                col += pow(saturate(hex.uv.y), 1.7) * hexs * 0.15;
+                col += pow(saturate(hex.uv.y), 2.9) * hexs * 0.15;
+                col += pow(saturate(uvNorm.y), 1.7) * hexs * 0.15;
 
                 // shadow
-                col -= pow(saturate(-hex.uv.y), 1.7) * hexs * 0.15;
+                col -= pow(saturate(-hex.uv.y), 1.7) * hexs * 0.25;
+                col -= pow(saturate(-uvNorm.y), 1.7) * hexs * 0.045;
+
+                // edge flare
+                col += smoothstep(0.4, 0.42, saturate(dot(hex.uv, normalize(float2(1.0, 1.73))))) * hexs * 0.2;
+                col += smoothstep(0.4, 0.42, saturate(dot(hex.uv, normalize(float2(-1.0, 1.73))))) * hexs * 0.2;
+
+                // edge shadow
+                col -= smoothstep(0.4, 0.42, saturate(dot(-hex.uv, normalize(float2(1.0, 1.73))))) * hexs * 0.06;
+                col -= smoothstep(0.4, 0.42, saturate(dot(-hex.uv, normalize(float2(-1.0, 1.73))))) * hexs * 0.06;
 
                 return float4(col, 1.0);
             }

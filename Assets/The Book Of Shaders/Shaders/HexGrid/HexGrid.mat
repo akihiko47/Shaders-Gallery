@@ -84,7 +84,7 @@ Material:
     m_Colors:
     - _ColActive: {r: 0, g: 0.21372674, b: 0.3283019, a: 1}
     - _ColBg: {r: 0, g: 0, b: 0, a: 1}
-    - _ColGlow: {r: 0.4339623, g: 0.4339623, b: 0.4339623, a: 1}
+    - _ColGlow: {r: 0.3433962, g: 0.3433962, b: 0.3433962, a: 1}
     - _ColGlowActive: {r: 0.42830187, g: 0.77245826, b: 1, a: 1}
     - _ColHex: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
