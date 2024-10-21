@@ -48,9 +48,9 @@ Shader "Custom/HexGrid" {
 
             struct hexData{
                 float2 uv; // uv of each hex
+                float2 id; // id of each hex
                 float d;   // distance from edge
                 float r;   // polar angle
-                float2 id; // id of each hex
             };
 
             hexData hexCoords(float2 uv) {
