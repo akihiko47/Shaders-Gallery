@@ -75,8 +75,8 @@ Shader "Custom/SquareGrid" {
                 float hor = (mod(floor(uvs.y), 2.0) == 0.0 ? 1.0 : 0.0);
                 float ver = (mod(floor(uvs.x), 2.0) == 0.0 ? 1.0 : 0.0);
                 float2 uvMove = float2(
-                    i.uv.x + hor * saturate(sin(_Time.y))  * 0.1,
-                    i.uv.y + ver * saturate(-sin(_Time.y)) * 0.1
+                    i.uv.x + hor * (smoothstep(0.0, 1.0, mod(_Time.y, 8.0))       - smoothstep(4.0, 5.0, mod(_Time.y, 8.0))) * 0.1,
+                    i.uv.y + ver * (smoothstep(0.0, 1.0, mod(_Time.y - 2.0, 8.0)) - smoothstep(4.0, 5.0, mod(_Time.y - 2.0, 8.0))) * 0.1
                     );
                 squareData sqr = squareCoords(uvMove * N);
 
