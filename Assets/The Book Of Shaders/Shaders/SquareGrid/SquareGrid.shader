@@ -2,7 +2,9 @@ Shader "Custom/SquareGrid" {
 
     Properties {
         _TexImage ("Texture", 2D) = "white" {}
-        _Tint ("Tint", Color) = (0.5, 0.5, 0.5, 0.5)
+        _Color1 ("Color 1", Color) = (0.5, 0.5, 0.5, 1.0)
+        _Color2 ("Color 2", Color) = (0.5, 0.5, 0.5, 1.0)
+        _ColorEdge ("Color Edge", Color) = (0.5, 0.5, 0.5, 1.0)
     }
 
     SubShader {
@@ -18,7 +20,7 @@ Shader "Custom/SquareGrid" {
             #define TWO_PI 6.28318530718
             #define PI     3.14159265359
 
-            float4 _Tint;
+            float4 _Color1, _Color2, _ColorEdge;
             sampler2D _TexImage;
 
             struct appdata {
@@ -31,8 +33,31 @@ Shader "Custom/SquareGrid" {
                 float4 vertex : SV_POSITION;
             };
 
+            float random (float2 st){
+                return frac(sin(dot(st.xy, float2(12.9898, 78.233))) * 43756.657);
+            }
+
             float mod(float x, float y){
                 return x - y * floor(x / y);
+            }
+
+            float2 rotate(float2 uv, float th){
+                return mul(float2x2(cos(th), sin(th), -sin(th), cos(th)), uv);
+            }
+
+            float sdCircle(float2 p, float r){
+                return length(p) - r;
+            }
+
+            float2 rotateOnThes(in float2 uv, in float i){
+                if(i > 0.75){
+                    uv = rotate(uv, PI * 0.5);
+                } else if(i > 0.5){
+                    uv = rotate(uv, PI);
+                } else if(i > 0.25){
+                    uv = rotate(uv, -PI * 0.5);;
+                }
+                return uv;
             }
 
             struct squareData{
@@ -74,8 +99,8 @@ Shader "Custom/SquareGrid" {
                 float ver = (mod(floor(uvs.x), 2.0) == 0.0 ? 1.0 : 0.0);
 
                 float2 uvMove = float2(
-                    i.uv.x + hor * (smoothstep(0.0, 1.0, mod(_Time.y, 8.0))       - smoothstep(2.0, 3.0, mod(_Time.y, 8.0))) * 0.2,
-                    i.uv.y + ver * (smoothstep(0.0, 1.0, mod(_Time.y - 4.0, 8.0)) - smoothstep(2.0, 3.0, mod(_Time.y - 4.0, 8.0))) * 0.2
+                    i.uv.x + hor * (smoothstep(0.0, 1.0, mod(_Time.y, 8.0))       - smoothstep(2.0, 3.0, mod(_Time.y, 8.0))) * 0.4,
+                    i.uv.y + ver * (smoothstep(0.0, 1.0, mod(_Time.y - 4.0, 8.0)) - smoothstep(2.0, 3.0, mod(_Time.y - 4.0, 8.0))) * 0.4
                     );
                 squareData sqr = squareCoords(uvMove * N);
 
@@ -84,14 +109,23 @@ Shader "Custom/SquareGrid" {
                 // base color
                 float3 col = float3(0.0, 0.0, 0.0);
 
-                // circles
-                float circles = 1.0 - smoothstep(0.6, 0.61, sqr.d);
-                col += circles.xxx;
+                // edges
+                float edge = (saturate(smoothstep(0.9, 0.91, abs(sqr.uv.x)) + smoothstep(0.9, 0.91, abs(sqr.uv.y))));
+                col += edge * _ColorEdge;
 
-                // small circles
-                float2 uvPupls = float2(sqr.uv.x + sin(_Time.y * sqr.id.y + sqr.id.x) * 0.3, sqr.uv.y + cos(_Time.y * sqr.id.x + sqr.id.y) * 0.3);
-                float smallCircles = 1.0 - smoothstep(0.2, 0.21, length(uvPupls));
-                col -= float3(1.0, 1.0, 1.0) * smallCircles;
+                // lines
+                float2 uvRot = rotateOnThes(sqr.uv, random(sqr.id)) * 0.5 + 0.5;
+                float lines = ((step(length(uvRot), 0.6) - step(length(uvRot), 0.4)) + (step(length(uvRot - 1.0), 0.6) - step(length(uvRot -1.0), 0.4))) * (1.0 - edge);
+                float4 grad = lerp(_Color1, _Color2, sqr.id.y / N);
+                col += lines * grad.rgb;
+
+                // random brightness
+                float brightness = pow(random(sqr.id + _Time.y * 0.0000003), 0.5);
+                col *= brightness;
+
+                // glow
+                float glow = (saturate(0.05 / (abs(sdCircle(uvRot, 0.5))) + saturate(0.05 / abs(sdCircle(1.0 - uvRot, 0.5))))) * (1.0 - edge) * brightness;
+                col += glow * grad;
 
                 return float4(col, 1.0);
             }
