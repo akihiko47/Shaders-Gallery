@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SquareGrid
-  m_Shader: {fileID: 4800000, guid: 4eb6220c8c4d3be41988c1e4e9db2b8b, type: 3}
+  m_Name: Matrix
+  m_Shader: {fileID: 4800000, guid: 8c32636b861a6b843af85b63005b4d56, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -59,10 +59,6 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _TexImage:
-        m_Texture: {fileID: 2800000, guid: 6e4769cdd08a1724e91417a069955cfe, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
@@ -74,7 +70,7 @@ Material:
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
-    - _N: 10
+    - _N: 60
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
@@ -83,10 +79,9 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
+    - _ColMain: {r: 0, g: 0.4490565, b: 0, a: 1}
+    - _ColTrail: {r: 0, g: 0.2905661, b: 0.28745434, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Color1: {r: 1, g: 0.0039215684, b: 0.8337292, a: 1}
-    - _Color2: {r: 0, g: 0.51789284, b: 1, a: 1}
-    - _ColorEdge: {r: 0.15134946, g: 0.09050197, b: 0.21509439, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Tint: {r: 0.99607843, g: 0.68235296, b: 0.20392157, a: 1}
   m_BuildTextureStacks: []
