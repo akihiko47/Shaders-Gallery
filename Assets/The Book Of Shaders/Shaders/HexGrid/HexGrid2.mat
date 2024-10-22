@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: HexGrid
+  m_Name: HexGrid2
   m_Shader: {fileID: 4800000, guid: fb928fd48a3869741b849b4c24ec2b3c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -74,7 +74,7 @@ Material:
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
-    - _N: 5
+    - _N: 8
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
@@ -83,11 +83,11 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _ColActive: {r: 0, g: 0.21372674, b: 0.3283019, a: 1}
+    - _ColActive: {r: 0, g: 0, b: 0, a: 1}
     - _ColBg: {r: 0, g: 0, b: 0, a: 1}
     - _ColGlow: {r: 0.3433962, g: 0.3433962, b: 0.3433962, a: 1}
-    - _ColGlowActive: {r: 0.42830187, g: 0.77245826, b: 1, a: 1}
-    - _ColHex: {r: 0.7207546, g: 0.7207546, b: 0.7207546, a: 1}
+    - _ColGlowActive: {r: 1, g: 0.4303999, b: 0, a: 1}
+    - _ColHex: {r: 0.77254903, g: 0.1571238, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Tint: {r: 0.99607843, g: 0.68235296, b: 0.20392157, a: 1}

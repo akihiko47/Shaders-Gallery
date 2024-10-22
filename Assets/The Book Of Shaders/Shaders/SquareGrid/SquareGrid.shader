@@ -1,7 +1,7 @@
 Shader "Custom/SquareGrid" {
 
     Properties {
-        _TexImage ("Texture", 2D) = "white" {}
+        _N ("Grid Dimensions", float) = 10.0
         _Color1 ("Color 1", Color) = (0.5, 0.5, 0.5, 1.0)
         _Color2 ("Color 2", Color) = (0.5, 0.5, 0.5, 1.0)
         _ColorEdge ("Color Edge", Color) = (0.5, 0.5, 0.5, 1.0)
@@ -21,7 +21,7 @@ Shader "Custom/SquareGrid" {
             #define PI     3.14159265359
 
             float4 _Color1, _Color2, _ColorEdge;
-            sampler2D _TexImage;
+            float _N;
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -92,7 +92,7 @@ Shader "Custom/SquareGrid" {
                 // coordinates;
                 float2 uvNorm = i.uv * 2.0 - 1.0;
 
-                float N = 10.0;
+                float N = _N;
                 float2 uvs = i.uv * N;
 
                 float hor = (mod(floor(uvs.y), 2.0) == 0.0 ? 1.0 : 0.0);

@@ -1,6 +1,7 @@
 Shader "Custom/HexGrid" {
 
     Properties {
+        _N ("Grid Dimensions", float) = 5.0 
         _ColHex ("Color Hexagons", Color) = (0.5, 0.5, 0.5, 1.0)
         _ColBg ("Color Background", Color) = (0.5, 0.5, 0.5, 1.0)
         _ColActive ("Color Highlight", Color) = (0.5, 0.5, 0.5, 1.0)
@@ -23,6 +24,7 @@ Shader "Custom/HexGrid" {
             #define PI     3.14159265359
 
             float4 _ColHex, _ColBg, _ColActive, _ColGlow, _ColGlowActive;
+            float _N;
             sampler2D _TexMetal;
 
             struct appdata {
@@ -83,7 +85,7 @@ Shader "Custom/HexGrid" {
 
                 // coordinates
                 float2 uvNorm = i.uv * 2.0 - 1.0;
-                hexData hex = hexCoords(uvNorm * 5.0);
+                hexData hex = hexCoords(uvNorm * _N);
 
                 float3 col = 0.0;
 
@@ -97,7 +99,7 @@ Shader "Custom/HexGrid" {
 
                 // matal texture
                 float3 metal = tex2D(_TexMetal, i.uv).rgb;
-                col *= pow((metal + 0.5), 5.0) * hexs;
+                col *= pow((metal + 0.5), 5.0) * hexs * 2.0;
 
                 // pulses
                 col += pulse * _ColActive * hexs;
