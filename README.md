@@ -13,6 +13,8 @@ Many of them have settings such as color, etc. Feel free to use these shaders wh
 
 !["Matrix"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/matrix.gif)
 
+!["S"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/s.gif)
+
 !["Sqr"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/sqr.gif)
 
 !["Sqr2"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/sqr2.gif)
