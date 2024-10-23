@@ -3,13 +3,15 @@
 This repository stores shaders that I made by reading ["The book of shaders"](https://thebookofshaders.com/). 
 Some of the shaders were inspired by shaders from the [shadertoy](https://www.shadertoy.com/) website.
 
+Many of them have settings such as color, etc. Feel free to use these shaders wherever you want!
+
 ## Gallery 🖼️
 
 !["HexGrid"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/hex.gif)
 
-!["HexGrid2"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/hex2.gif)
-
 !["Radar"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/radar.gif)
+
+!["Matrix"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/matrix.gif)
 
 !["Sqr"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/sqr.gif)
 
