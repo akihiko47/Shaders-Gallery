@@ -5,7 +5,7 @@ Some of the shaders were inspired by shaders from the [shadertoy](https://www.sh
 
 ## Gallery 🖼️
 
-Work in progress...
+!["HexGrid"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/tree/main/Images/hex.gif)
 
 Thank you for reading this! 😊
 
