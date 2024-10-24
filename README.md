@@ -11,6 +11,8 @@ Many of them have settings such as color, etc. Feel free to use these shaders wh
 
 !["Radar"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/radar.gif)
 
+!["Blob"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/blob.gif)
+
 !["Matrix"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/matrix.gif)
 
 !["S"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/s.gif)
