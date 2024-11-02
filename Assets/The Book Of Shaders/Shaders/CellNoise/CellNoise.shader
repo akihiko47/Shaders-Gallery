@@ -45,31 +45,11 @@ Shader "Custom/CellNoise" {
                               frac(sin(dot(st.xy, float2(31.6197, 42.442))) * 73185.853));
             }
 
-            struct squareData{
+            struct cellData{
                 float2 uv; // uv of each sqr
                 float2 id; // id of each sqr
                 float d;   // distance from center
-                float r;   // polar angle
-            };
-
-            squareData squareCoords(float2 uv){
-                squareData res;
-
-                res.uv = frac(uv);
-                res.uv = res.uv;
-
-                res.id = floor(uv);
-                res.d = length(res.uv);
-                res.r = (atan2(-res.uv.x, -res.uv.y) / TWO_PI) + 0.5;
-
-                return res;
-            }
-
-            struct cellData{
-                float2 uv; // uv of each sqr
-                float id;  // id of each sqr
-                float d;   // distance from edges
-                float r;   // polar angle
+                float bd;  // distance from edges
             };
 
             cellData cellCoords(float2 uv){
@@ -78,25 +58,50 @@ Shader "Custom/CellNoise" {
                 float2 sqrId = floor(uv);
                 float2 sqrUv = frac(uv);
 
+                float2 minOffset;
+                float2 minP;
+
                 float d = 3.402823466e+38F;
-                float id;
+                float2 id;
                 for(int y = -1; y <= 1; y++){
                     for(int x = -1; x <= 1; x++){
                         float2 idOffset = float2(x, y);
-                        float2 cellId = random2(sqrId + idOffset);
-                        float2 p = (0.5 + 0.5 * sin(_Time.y * cellId)) - sqrUv + idOffset;
-                        float dist = dot(p, p);
-                        if(dist < d){
-                            d = dist;
-                            id = cellId;
+                        float2 randPoint = random2(sqrId + idOffset);
+
+                        // ANIMATION HERE
+                        randPoint = sin(_Time.y * randPoint) * 0.5 + 0.5;
+
+                        float2 p = randPoint + idOffset - sqrUv;
+                        float sqrDist = dot(p, p);
+                        if(sqrDist < d){
+                            d = sqrDist;
+                            id = sqrId + idOffset;
+                            minOffset = idOffset;
+                            minP = p;
                         }
+                    }
+                }
+
+                float bd = 3.402823466e+38F;
+                for(int j = -2; j <= 2; j++){
+                    for(int i = -2; i <= 2; i++){
+                        float2 idOffset = minOffset + float2(i, j);
+                        float2 randPoint = random2(sqrId + idOffset);
+
+                        // ANIMATION HERE
+                        randPoint = sin(_Time.y * randPoint) * 0.5 + 0.5;
+
+                        float2 p = randPoint + idOffset - sqrUv;
+                        float dist = dot(0.5 * (minP + p), normalize(p - minP));
+
+                        bd = min(bd, dist);
                     }
                 }
                 
                 res.d = sqrt(d);
                 res.id = id;
-                res.uv = 0.0;
-                res.r = 0.0;
+                res.uv = float2(-minP.x, -minP.y);
+                res.bd = bd;
 
                 return res;
             }
@@ -104,11 +109,11 @@ Shader "Custom/CellNoise" {
             float4 frag (v2f i) : SV_Target{
 
                 // coordinates
-                cellData cell = cellCoords(i.uv * 10.0);
+                cellData cell = cellCoords((i.uv * 2.0 - 1.0) * 5.0);
 
                 float3 col = 0.0;
 
-                col += cell.d;
+                col += cell.bd;
 
                 return float4(col, 1.0);
             }
