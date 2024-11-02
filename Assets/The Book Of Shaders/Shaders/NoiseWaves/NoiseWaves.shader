@@ -71,12 +71,19 @@ Shader "Custom/NoiseWaves" {
             float4 frag (v2f i) : SV_Target {
                 float3 col = float3(0.0, 0.0, 0.0);
 
-                float nse = noise(i.uv + float2(_Time.y * 0.1, _Time.y * 0.1));
+                float nse = 0.0;
+                float2 uvn = i.uv * 1.0 + float2(_Time.y * 0.1, 0.0);
+                float2x2 m = float2x2(1.6, 1.2, -1.2, 1.6);
+                nse  = 0.5000 * noise(uvn); uvn = mul(m, uvn);
+                nse += 0.2500 * noise(uvn); uvn = mul(m, uvn);
+                nse += 0.1250 * noise(uvn); uvn = mul(m, uvn);
+                nse += 0.0625 * noise(uvn); uvn = mul(m, uvn);
+                nse += 0.0312 * noise(uvn); uvn = mul(m, uvn);
 
                 float2 uvRot = rotate(i.uv, nse * 6.0);
 
                 float lines = sin(uvRot.y * TWO_PI * 3.0) * 0.5 + 0.5;
-                lines = smoothstep(0.2, 0.3, lines) - smoothstep(0.6, 0.7, lines);
+                //lines = smoothstep(0.2, 0.3, lines) - smoothstep(0.6, 0.7, lines);
                 col += lerp(_Col1, _Col2, lines);
 
                 return float4(col, 1.0);
