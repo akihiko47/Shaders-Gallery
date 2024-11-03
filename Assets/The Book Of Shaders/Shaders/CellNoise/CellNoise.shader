@@ -1,7 +1,8 @@
 Shader "Custom/CellNoise" {
 
     Properties {
-        _Tint ("Tint", Color) = (0.5, 0.5, 0.5, 1.0)
+        _Col1 ("Color 1", Color) = (0.5, 0.5, 0.5, 1.0)
+        _Col2 ("Color 2", Color) = (0.5, 0.5, 0.5, 1.0)
     }
 
     SubShader {
@@ -17,7 +18,7 @@ Shader "Custom/CellNoise" {
             #define TWO_PI 6.28318530718
             #define PI     3.14159265359
 
-            float4 _Tint;
+            float4 _Col1, _Col2;
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -69,7 +70,7 @@ Shader "Custom/CellNoise" {
                         float2 randPoint = random2(sqrId + idOffset);
 
                         // ANIMATION HERE
-                        randPoint = sin(_Time.y * randPoint) * 0.5 + 0.5;
+                        randPoint = sin(_Time.y * 0.2 * randPoint) * 0.5 + 0.5;
 
                         float2 p = randPoint + idOffset - sqrUv;
                         float sqrDist = dot(p, p);
@@ -89,7 +90,7 @@ Shader "Custom/CellNoise" {
                         float2 randPoint = random2(sqrId + idOffset);
 
                         // ANIMATION HERE
-                        randPoint = sin(_Time.y * randPoint) * 0.5 + 0.5;
+                        randPoint = sin(_Time.y * 0.2 * randPoint) * 0.5 + 0.5;
 
                         float2 p = randPoint + idOffset - sqrUv;
                         float dist = dot(0.5 * (minP + p), normalize(p - minP));
@@ -110,10 +111,22 @@ Shader "Custom/CellNoise" {
 
                 // coordinates
                 cellData cell = cellCoords((i.uv * 2.0 - 1.0) * 5.0);
+                cellData cell2 = cellCoords((i.uv * 2.0 - 1.0) * 1.0);
 
+                // main color
                 float3 col = 0.0;
 
-                col += cell.bd;
+                // cracks
+                float cracs = smoothstep(0.05, 0.06, saturate(cell.bd));
+                col += cracs * lerp(_Col1, _Col2, cell.id.y * 0.1 + 0.55) * cracs;
+
+                // shadow
+                col *= (smoothstep(0.08, 0.02, cell2.bd));
+
+                // big cracks
+                col += cell2.bd > 0.1;
+                col += lerp(_Col1, _Col2, cell.id.y * 0.1 + 0.55) * (cell2.bd > 0.07) * (cell2.bd < 0.1) * 0.4;
+                
 
                 return float4(col, 1.0);
             }
