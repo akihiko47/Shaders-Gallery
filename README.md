@@ -11,6 +11,10 @@ Many of them have settings such as color, etc. Feel free to use these shaders wh
 
 !["Radar"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/radar.gif)
 
+!["Voronoi"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/voronoi.gif)
+
+!["Waves"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/waves.gif)
+
 !["Blob"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/blob.gif)
 
 !["Matrix"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/matrix.gif)
