@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FBM
-  m_Shader: {fileID: 4800000, guid: e5d40dd27dde75c47b9d52ec4a3fe06a, type: 3}
+  m_Name: FBMgradient
+  m_Shader: {fileID: 4800000, guid: 5f0b09a9257ef9c4fbbe22384d2f8eb7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -78,9 +78,10 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Col1: {r: 0.3436596, g: 0.6528301, b: 0.52150106, a: 1}
-    - _Col2: {r: 1, g: 1, b: 1, a: 1}
-    - _Col3: {r: 0.23433957, g: 0.5999999, b: 0.5993074, a: 1}
+    - _Col1: {r: 1, g: 0.73018867, b: 0.75405204, a: 1}
+    - _Col2: {r: 0.335849, g: 0.06273403, b: 0.26092038, a: 1}
+    - _Col3: {r: 0.3660378, g: 0, b: 0.16714758, a: 1}
+    - _Col4: {r: 0.5622641, g: 0, b: 0.35143274, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Tint: {r: 0.99607843, g: 0.68235296, b: 0.20392157, a: 1}
