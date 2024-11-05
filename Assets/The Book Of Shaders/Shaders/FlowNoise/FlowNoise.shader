@@ -1,4 +1,4 @@
-Shader "Custom/FBMgradient" {
+Shader "Custom/FlowNoise" {
 
     Properties {
         _Col1 ("Color 1", Color) = (0.5, 0.5, 0.5, 1.0)
@@ -45,7 +45,7 @@ Shader "Custom/FBMgradient" {
                 float2 res = (n >= 6) ? float2(0.0, gr.x) :
                              (n >= 4) ? float2(gr.x, 0.0) :
                              gr;
-                return rotate(res, _Time.y * rot * 0.2);
+                return rotate(res, _Time.y * rot);
             }
 
             // by IQ
@@ -61,17 +61,17 @@ Shader "Custom/FBMgradient" {
                                  dot(grad(i + int2(1, 1), rot), f - float2(1.0, 1.0)), u.x), u.y);
             }
 
-            #define OCTAVES 9
+            #define OCTAVES 6
             float fbm(float2 uv){
 
                 float value = 0.0;
-                float amplitude = 0.5;
-                float rot = 1.5;
+                float amplitude = 0.8;
+                float rot = 1.2;
 
                 for(int i = 0; i < OCTAVES; i++){
-                    value += amplitude * (noise(uv, rot) * 0.5 + 0.5);
+                    value += amplitude * abs(noise(uv, rot));
                     uv *= 2.0;
-                    amplitude *= 0.5;
+                    amplitude *= 0.4;
                     rot *= 1.5;
                 }
                 return value;
@@ -98,21 +98,18 @@ Shader "Custom/FBMgradient" {
 
                 // NOISE
                 float2 q;
-                q.x = fbm(p + float2(6.9, 0.0)) + (sin(_Time.y * 0.5)) * 0.08;
-                q.y = fbm(p + float2(5.2, 1.3)) + (cos(_Time.y * 0.3)) * 0.1;
+                q.x = fbm(p + float2(6.9, 0.0));
+                q.y = fbm(p + float2(5.2, 1.3));
 
-                float2 r;
-                r.x = fbm(p + 4.0 * q + float2(1.7, 9.2));
-                r.y = fbm(p + 4.0 * q + float2(8.3, 2.8));
-
-                float nse = fbm(p + 4.0 * r);
+                float nse = fbm(p + q);
 
                 // COLOR
-                col = lerp(_Col1, _Col2, saturate(pow(nse, 1.5)));
-                col = lerp(col, _Col3, q.y * q.y);
-                col = lerp(col, _Col4, smoothstep(0.8, 0.85, r.x + r.y) - smoothstep(0.85, 0.9, r.x + r.y));
+                col += nse;
+                //col = lerp(_Col1, _Col2, saturate(pow(nse, 1.5)));
+                //col = lerp(col, _Col3, q.y * q.y);
+                //col = lerp(col, _Col4, smoothstep(0.8, 0.85, r.x + r.y) - smoothstep(0.85, 0.9, r.x + r.y));
 
-                return float4(pow(col, 3.0), 1.0);
+                return float4(pow(col, 4.0), 1.0);
             }
 
             ENDCG
