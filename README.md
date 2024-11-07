@@ -7,6 +7,10 @@ Many of them have settings such as color, etc. Feel free to use these shaders wh
 
 ## Gallery 🖼️
 
+!["FBM"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/fbm.gif)
+
+!["FlowNoise"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/flownoise.gif)
+
 !["HexGrid"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/hex.gif)
 
 !["Radar"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/radar.gif)
