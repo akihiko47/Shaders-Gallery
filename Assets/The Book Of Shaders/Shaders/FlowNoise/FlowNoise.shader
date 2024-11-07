@@ -103,13 +103,22 @@ Shader "Custom/FlowNoise" {
 
                 float nse = fbm(p + q);
 
-                // COLOR
-                col += nse;
-                //col = lerp(_Col1, _Col2, saturate(pow(nse, 1.5)));
-                //col = lerp(col, _Col3, q.y * q.y);
-                //col = lerp(col, _Col4, smoothstep(0.8, 0.85, r.x + r.y) - smoothstep(0.85, 0.9, r.x + r.y));
+                // CIRCLE
+                float dfC = length(i.uv * 2.0 - 1.0) - 0.4 + fbm(i.uv * 20.0) * 0.05;
+                float circle = smoothstep(0.02, 0.01, dfC) - smoothstep(-0.01, -0.012, dfC);
 
-                return float4(pow(col, 4.0), 1.0);
+                // GLOW
+                float glow = saturate(0.001 / pow((dfC - 0.01), 2.0));
+                col += glow;
+
+                // FIRE
+                float3 fire;
+                fire = lerp(_Col1, _Col2, saturate(pow(nse, 1.5)));
+                fire = pow(lerp(fire, _Col3, q.y * q.y), 4.0);
+                col += glow * fire * 8.0;
+                
+
+                return float4(col, 1.0);
             }
 
             ENDCG
