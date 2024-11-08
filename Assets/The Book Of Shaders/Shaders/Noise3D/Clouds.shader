@@ -94,10 +94,11 @@ Shader "Custom/Clouds" {
                 // q      = fbm(p)---this
 
                 // COORDS
-                float3 p = i.objPos * float3(1.0, 10.0, 1.0);
-                float t = _Time.y * 1.0;
+                float3 p = i.objPos * float3(1.0, 6.0, 1.0);
+                float t = _Time.y * 2.0;
                 float2x2 m = float2x2(cos(t), -sin(t), sin(t), cos(t));
                 p.xz = mul(m, p.xz);
+
 
                 // BASE COLOR
                 float3 col = 0.0;
