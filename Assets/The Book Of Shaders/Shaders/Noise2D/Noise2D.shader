@@ -1,4 +1,4 @@
-Shader "Custom/NoiseWaves" {
+Shader "Custom/Noise2D" {
 
     Properties {
         _Col1 ("Color 1", Color) = (0.5, 0.5, 0.5, 1.0)

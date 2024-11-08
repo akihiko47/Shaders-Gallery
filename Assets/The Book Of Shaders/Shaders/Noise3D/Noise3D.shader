@@ -1,7 +1,11 @@
-Shader "Custom/Phong" {
+Shader "Custom/Noise3D" {
 
     Properties {
-        _ColDif ("Diffuse Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        _ColDif1 ("Diffuse Color 1", Color) = (1.0, 1.0, 1.0, 1.0)
+        _ColDif2 ("Diffuse Color 2", Color) = (1.0, 1.0, 1.0, 1.0)
+        _ColDif3 ("Diffuse Color 3", Color) = (1.0, 1.0, 1.0, 1.0)
+        _ColFres1 ("Fresnel Color 1", Color) = (1.0, 1.0, 1.0, 1.0)
+        _ColFres2 ("Fresnel Color 2", Color) = (1.0, 1.0, 1.0, 1.0)
         _ColSpec ("Specular Color", Color) = (1.0, 1.0, 1.0, 1.0)
         _ColAmb ("Ambient Color", Color) = (0.0, 0.0, 0.0, 1.0)
         _Q ("Specular exponent", float) = 10.0
@@ -26,7 +30,7 @@ Shader "Custom/Phong" {
             #pragma multi_compile _ SHADOWS_SCREEN
             #define FORWARD_BASE_PASS
 
-            #include "Phong.cginc"
+            #include "Noise3D.cginc"
 
             ENDCG
         }
@@ -45,7 +49,7 @@ Shader "Custom/Phong" {
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows //#pragma multi_compile DIRECTIONAL DIRECTIONAL_COOKIE POINT POINT_COOKIE SPOT + Multiple shadows
 
-            #include "Phong.cginc"
+            #include "Noise3D.cginc"
 
             ENDCG
         }
