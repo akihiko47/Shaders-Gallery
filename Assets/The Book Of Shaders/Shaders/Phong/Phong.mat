@@ -72,7 +72,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Q: 20.38
+    - _Q: 37.7
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -81,7 +81,7 @@ Material:
     m_Colors:
     - _ColAmb: {r: 0.20063363, g: 0.27468425, b: 0.381132, a: 1}
     - _ColDif: {r: 0, g: 0.61132056, b: 0.7735849, a: 1}
-    - _ColSpec: {r: 0.8415094, g: 0.8415094, b: 0.8415094, a: 1}
+    - _ColSpec: {r: 0.6528301, g: 0.6528301, b: 0.6528301, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

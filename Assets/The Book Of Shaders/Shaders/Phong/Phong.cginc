@@ -40,13 +40,13 @@ float3 BlinnPhong(float3 kd, float3 ks, float3 ka, float q, v2f i){
     float3 Li = _LightColor0;
     UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
 
-    float3 col = (kd * max(0.0, dot(N, L)) + ks * pow(max(0.0, dot(N, H)), q)) * attenuation;
+    float3 col = (kd * max(0.0, dot(N, L) + 0.1) + ks * pow(max(0.0, dot(N, H)), q)) * attenuation * _LightColor0.rgb;
 
     #ifdef FORWARD_BASE_PASS
         col += ka;
     #endif
 
-    return col * _LightColor0.rgb;
+    return col;
 }
 
 v2f vert (appdata v){
