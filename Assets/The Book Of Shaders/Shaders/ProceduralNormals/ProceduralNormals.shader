@@ -1,6 +1,7 @@
 Shader "Custom/ProceduralNormals" {
 
     Properties {
+        _NormalsCoef ("Normals Coefficient", Float) = 5.0
         _ColDif1 ("Diffuse Color 1", Color) = (1.0, 1.0, 1.0, 1.0)
         _ColDif2 ("Diffuse Color 2", Color) = (1.0, 1.0, 1.0, 1.0)
         _ColSpec ("Specular Color", Color) = (1.0, 1.0, 1.0, 1.0)

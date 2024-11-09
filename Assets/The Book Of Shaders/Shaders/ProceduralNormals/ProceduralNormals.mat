@@ -70,24 +70,25 @@ Material:
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
+    - _NormalsCoef: 1.3
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Q: 164
+    - _Q: 15.8
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _ColAmb: {r: 0.05962974, g: 0.048949793, b: 0.09433961, a: 1}
+    - _ColAmb: {r: 0.025453888, g: 0.029387668, b: 0.04905659, a: 1}
     - _ColDif: {r: 0.14804552, g: 0.744996, b: 0.90188676, a: 1}
-    - _ColDif1: {r: 0.4113207, g: 0, b: 0, a: 1}
-    - _ColDif2: {r: 0, g: 0, b: 0, a: 1}
+    - _ColDif1: {r: 0, g: 0, b: 0, a: 1}
+    - _ColDif2: {r: 0.7283019, g: 0.18001422, b: 0.18001422, a: 1}
     - _ColDif3: {r: 0, g: 0.04348826, b: 0.13207549, a: 1}
     - _ColFres: {r: 0, g: 0.7454449, b: 0.85660374, a: 1}
     - _ColFres1: {r: 0.16436455, g: 0.24228345, b: 0.509434, a: 1}
     - _ColFres2: {r: 0.42986822, g: 0.52233374, b: 0.6075471, a: 1}
-    - _ColSpec: {r: 0.690566, g: 0.603268, b: 0.603268, a: 1}
+    - _ColSpec: {r: 0.4188679, g: 0.26159483, b: 0.26159483, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

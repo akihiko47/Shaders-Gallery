@@ -93,3 +93,4 @@ Shader "Custom/Noise2D" {
         }
     }
 }
+

@@ -6,7 +6,7 @@
 #include "AutoLight.cginc"
 
 float4 _ColDif1, _ColDif2, _ColSpec, _ColAmb;
-float _Q;
+float _Q, _NormalsCoef;
 
 struct appdata{
     float4 vertex : POSITION;
@@ -27,12 +27,16 @@ struct v2f{
 };
 
 // By IQ
-float3 hash(float3 p) // replace this by something better
-{
+float3 hash(float3 p) {
     p = float3(dot(p, float3(127.1, 311.7, 74.7)),
                dot(p, float3(269.5, 183.3, 246.1)),
                dot(p, float3(113.5, 271.9, 124.6)));
     p = -1.0 + 2.0 * frac(sin(p) * 43758.5453123);
+
+    // ROTATION PART
+    float t = _Time.y * 2.0;
+    float2x2 m = float2x2(cos(t), -sin(t), sin(t), cos(t));
+    p.xz = mul(m, p.xz);
 
     return p;
 }
@@ -89,18 +93,21 @@ float4 noised(float3 x){
                  du * (float3(vb, vc, ve) - va + u.yzx * float3(va - vb - vc + vd, va - vc - ve + vg, va - vb - ve + vf) + u.zxy * float3(va - vb - ve + vf, va - vb - vc + vd, va - vc - ve + vg) + u.yzx * u.zxy * (-va + vb + vc - vd + ve - vf - vg + vh)));
 }
 
-#define OCTAVES 3
-float fbm(float3 uv){
+#define OCTAVES 6
+float4 fbm(float3 uv){
 
     float value = 0.0;
     float amplitude = 0.5;
+    float3 normal = float3(0.0, 0.0, 0.0);
 
     for(int i = 0; i < OCTAVES; i++){
-        value += amplitude * ((noise(uv)) * 0.5 + 0.5);
+        float4 nsed = noised(uv);
+        value += amplitude * abs(nsed.x);
+        normal += normalize(float3(nsed.y, _NormalsCoef, nsed.z)) * amplitude;
         uv *= 2.0;
         amplitude *= 0.5;
     }
-    return value;
+    return float4(value, normal);
 }
 
 float3 BlinnPhong(float3 kd, float3 ks, float3 ka, float q, v2f i){
@@ -120,13 +127,13 @@ float3 BlinnPhong(float3 kd, float3 ks, float3 ka, float q, v2f i){
     float3 Li = _LightColor0;
     UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
 
-    float3 col = (kd * max(0.0, dot(N, L)) + ks * pow(max(0.0, dot(N, H)), q)) * attenuation;
+    float3 col = (kd * max(0.0, dot(N, L) + 0.1) + ks * pow(max(0.0, dot(N, H)), q)) * attenuation * _LightColor0.rgb;
 
     #ifdef FORWARD_BASE_PASS
         col += ka;
     #endif
 
-    return col * _LightColor0.rgb;
+    return col;
 }
 
 v2f vert (appdata v){
@@ -145,31 +152,33 @@ v2f vert (appdata v){
 
 float4 frag (v2f i) : SV_Target{
     // COORDINATES
-    float3 p = i.objPos * 20.0;
+    float3 p = i.objPos * 5.0;
 
     // NORMALS
-    float4 nsed = noised(p) * 0.5 + 0.5;
+    float4 nsed = fbm(p);
 
-    float3 tangentSpaceNormal = nsed.yzw;
+    float3 tangentSpaceNormal = normalize(float3(nsed.y, nsed.z, nsed.w));
+    
     float3 binormal = cross(i.normal, i.tangent.xyz) * (i.tangent.w * unity_WorldTransformParams.w);
 
-    float3 N = normalize(
+    i.normal = normalize(
         tangentSpaceNormal.x * i.tangent +
-        tangentSpaceNormal.y * binormal +
-        tangentSpaceNormal.z * i.normal
+        tangentSpaceNormal.y * i.normal +
+        tangentSpaceNormal.z * binormal
     );
-    i.normal = N;
+    
 
     //return float4(i.normal, 1.0);
 
     // VALUES
     float3 V = normalize(_WorldSpaceCameraPos - i.worldPos);
+    float3 N = i.normal;
     
     // START COLOR
     float3 col = float3(0.0, 0.0, 0.0);
 
     // NOISE
-    float nse = noised(p).x * 0.5 + 0.5;;
+    float nse = nsed.x;
 
     // COLOR
     float3 kd = lerp(_ColDif1, _ColDif2, nse);
