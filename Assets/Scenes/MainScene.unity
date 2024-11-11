@@ -17,7 +17,7 @@ RenderSettings:
   m_Fog: 1
   m_FogColor: {r: 0, g: 0, b: 0, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.02
+  m_FogDensity: 0.06
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.5936703, g: 0.6460947, b: 0.7509433, a: 1}
@@ -251,7 +251,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5a3581dc81e5efb49bdb38b44caf67bf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 49.25
+      value: 43.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5a3581dc81e5efb49bdb38b44caf67bf, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1138,6 +1138,7 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1184,9 +1185,9 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.01
   far clip plane: 1000
-  field of view: 60
+  field of view: 45
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -1212,13 +1213,26 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0.2254221, y: -0.18941148, z: 0.04349181, w: -0.95468146}
+  m_LocalPosition: {x: 42.620926, y: 1.8186845, z: -1.9534383}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1605507202}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 751c28cf0e9057048820875c19822a57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _screenShader: {fileID: 4800000, guid: d7be72aa594601e41aaabdacacdc8dad, type: 3}
 --- !u!1 &973590622
 GameObject:
   m_ObjectHideFlags: 0
@@ -1719,7 +1733,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5a3581dc81e5efb49bdb38b44caf67bf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 43.5
+      value: 41
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5a3581dc81e5efb49bdb38b44caf67bf, type: 3}
       propertyPath: m_LocalPosition.y
