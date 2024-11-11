@@ -93,7 +93,7 @@ float4 noised(float3 x){
                  du * (float3(vb, vc, ve) - va + u.yzx * float3(va - vb - vc + vd, va - vc - ve + vg, va - vb - ve + vf) + u.zxy * float3(va - vb - ve + vf, va - vb - vc + vd, va - vc - ve + vg) + u.yzx * u.zxy * (-va + vb + vc - vd + ve - vf - vg + vh)));
 }
 
-#define OCTAVES 6
+#define OCTAVES 5
 float4 fbm(float3 uv){
 
     float value = 0.0;
@@ -104,7 +104,7 @@ float4 fbm(float3 uv){
         float4 nsed = noised(uv);
         value += amplitude * abs(nsed.x);
         normal += normalize(float3(nsed.y, _NormalsCoef, nsed.z)) * amplitude;
-        uv *= 2.0;
+        uv *= 5.5;
         amplitude *= 0.5;
     }
     return float4(value, normal);

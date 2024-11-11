@@ -73,7 +73,7 @@ Material:
     - _NormalsCoef: 1.3
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Q: 15.8
+    - _Q: 20.1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -88,7 +88,7 @@ Material:
     - _ColFres: {r: 0, g: 0.7454449, b: 0.85660374, a: 1}
     - _ColFres1: {r: 0.16436455, g: 0.24228345, b: 0.509434, a: 1}
     - _ColFres2: {r: 0.42986822, g: 0.52233374, b: 0.6075471, a: 1}
-    - _ColSpec: {r: 0.4188679, g: 0.26159483, b: 0.26159483, a: 1}
+    - _ColSpec: {r: 0.5018867, g: 0.3058668, b: 0.3058668, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
