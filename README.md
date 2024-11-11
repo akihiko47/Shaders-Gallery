@@ -6,6 +6,7 @@ Some of the shaders were inspired by shaders from the [shadertoy](https://www.sh
 Many of them have settings such as color, etc. Feel free to use these shaders wherever you want!
 
 ## Gallery 🖼️
+*(might take some time to load)*
 
 !["Thing"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/thing.gif)
 
