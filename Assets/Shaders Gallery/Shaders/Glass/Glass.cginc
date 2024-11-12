@@ -134,10 +134,22 @@ float4 frag (v2f i) : SV_Target{
     col += edge * lerp(_ColFres1, _ColFres2, edge);
 
     // BLUR
-    float3 ka = NoiseBlur(_RenderTexture, UVscreen, 0.1) + _ColAmb;
+    float3 ka = NoiseBlur(_RenderTexture, UVscreen, 0.04) + _ColAmb;
 
     // BRDF
     col += BlinnPhong(_ColDif, _ColSpec, ka, _Q, i);
+
+
+    // INDDIRECT LIGHT
+    float3 indirectSpec = 0.0;
+    float3 indirectDif = 0.0;
+    #if defined(FORWARD_BASE_PASS)
+        indirectDif += max(0, ShadeSH9(float4(i.normal, 1)));
+        float3 reflectionDir = reflect(-V, i.normal);
+        float4 envSample = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflectionDir);
+        indirectSpec = DecodeHDR(envSample, unity_SpecCube0_HDR);
+    #endif
+    col += indirectSpec * 0.5;
 
     // FOG
     UNITY_APPLY_FOG(i.fogCoord, col);
