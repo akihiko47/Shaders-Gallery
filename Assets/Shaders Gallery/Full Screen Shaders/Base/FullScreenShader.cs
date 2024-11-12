@@ -9,6 +9,8 @@ public class FullScreenShader : MonoBehaviour {
 
     private Material _renderMaterial;
 
+    private RenderTexture _renderTexture;
+
     private Camera _currentCamera;
 
     private void Start() {
