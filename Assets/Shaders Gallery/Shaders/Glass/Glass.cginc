@@ -134,7 +134,7 @@ float4 frag (v2f i) : SV_Target{
     col += edge * lerp(_ColFres1, _ColFres2, edge);
 
     // BLUR
-    float3 ka = NoiseBlur(_RenderTexture, UVscreen, 0.04) + _ColAmb;
+    float3 ka = NoiseBlur(_RenderTexture, UVscreen, 0.1) + _ColAmb;
 
     // BRDF
     col += BlinnPhong(_ColDif, _ColSpec, ka, _Q, i);
