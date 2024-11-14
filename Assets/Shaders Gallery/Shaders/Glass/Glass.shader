@@ -1,16 +1,26 @@
 Shader "Custom/Glass" {
 
     Properties {
+        [Header(Colors)]
+        [Space(10)]
         _ColDif ("Diffuse Color", Color) = (1.0, 1.0, 1.0, 1.0)
         _ColSpec ("Specular Color", Color) = (1.0, 1.0, 1.0, 1.0)
         _ColAmb ("Ambient Color", Color) = (0.0, 0.0, 0.0, 1.0)
         _ColFres1 ("Fresnel Color 1", Color) = (0.0, 0.0, 0.0, 1.0)
         _ColFres2 ("Fresnel Color 2", Color) = (0.0, 0.0, 0.0, 1.0)
+
+        [Header(Settings)]
+        [Space(10)]
         _Q ("Specular exponent", float) = 10.0
     }
 
     SubShader {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent"}
+
+        GrabPass
+        {
+            "_BGTex"
+        }
 
         Pass {
 

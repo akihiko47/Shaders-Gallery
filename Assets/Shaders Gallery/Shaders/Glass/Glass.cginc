@@ -10,6 +10,10 @@ float _Q;
 
 uniform sampler2D _RenderTexture;
 
+// grab pass
+uniform sampler2D _BGTex;
+uniform float4 _BGTex_TexelSize;
+
 struct appdata{
     float4 vertex : POSITION;
     float2 uv     : TEXCOORD0;
@@ -134,7 +138,10 @@ float4 frag (v2f i) : SV_Target{
     col += edge * lerp(_ColFres1, _ColFres2, edge);
 
     // BLUR
-    float3 ka = NoiseBlur(_RenderTexture, UVscreen, 0.1) + _ColAmb;
+    float3 ka = 0.0;
+    #ifdef FORWARD_BASE_PASS
+        ka = NoiseBlur(_BGTex, UVscreen, 0.1) + _ColAmb;
+    #endif
 
     // BRDF
     col += BlinnPhong(_ColDif, _ColSpec, ka, _Q, i);
