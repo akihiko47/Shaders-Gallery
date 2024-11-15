@@ -63,9 +63,10 @@ Material:
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
+    - _DepthStrength: 1.37
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _EdgeWidth: 5.15
+    - _EdgeWidth: 4.84
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -77,10 +78,13 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
+    - _VoronoiWidth: 0.1
     - _ZWrite: 1
     m_Colors:
-    - _ColEdge: {r: 0.8207547, g: 0.9648539, b: 1, a: 0.5}
-    - _ColWater: {r: 0.2128087, g: 0.64160645, b: 0.9169811, a: 0.5294118}
+    - _ColDepth: {r: 0.109803915, g: 0.6058649, b: 1, a: 1}
+    - _ColEdge: {r: 1, g: 1, b: 1, a: 1}
+    - _ColVor: {r: 0.5939551, g: 0.7080334, b: 0.78113204, a: 1}
+    - _ColWater: {r: 0, g: 0.7670703, b: 1, a: 0.77254903}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
