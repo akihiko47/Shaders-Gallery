@@ -3,16 +3,22 @@ Shader "Custom/Water" {
     Properties{
         [Header(Colors)]
         [Space(10)]
-        _ColWater ("Water Color", Color) = (0.5, 0.5, 0.5, 0.5)
+        _ColSurf1 ("Surface Color 1", Color) = (0.5, 0.5, 0.5, 0.5)
+        _ColSurf2 ("Surface Color 2", Color) = (0.5, 0.5, 0.5, 0.5)
         _ColDepth ("Depth Color", Color) = (0.5, 0.5, 0.5, 0.5)
+
+        [Space(10)]
         _ColEdge ("Edge Color", Color) = (0.5, 0.5, 0.5, 0.5)
         _ColVor ("Voronoi Color", Color) = (0.5, 0.5, 0.5, 0.5)
+        _ColSpec ("Specular Color", Color) = (0.5, 0.5, 0.5, 0.5)
 
         [Header(Settings)]
         [Space(10)]
         _EdgeWidth ("Edge Line Width", Float) = 0.5
         _DepthStrength ("Depth Strength", Float) = 0.5
         _VoronoiWidth ("Voronoi Width", Float) = 0.5
+        _Q ("Specular Power", Float) = 0.5
+        _WavesStrength ("Waves Strength", Float) = 0.05
     }
 
     SubShader {
@@ -23,14 +29,21 @@ Shader "Custom/Water" {
         Blend SrcAlpha OneMinusSrcAlpha
 
         Pass {
+
+            Tags {
+                "LightMode" = "ForwardBase"
+            }
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
             #include "UnityCG.cginc"
 
-            float4 _ColWater, _ColEdge, _ColVor, _ColDepth;
-            float _EdgeWidth, _DepthStrength, _VoronoiWidth;
+            #define FORWARD_BASE_PASS
+
+            float4 _ColSurf1, _ColSurf2, _ColEdge, _ColVor, _ColDepth, _ColSpec;
+            float _EdgeWidth, _DepthStrength, _VoronoiWidth, _Q, _WavesStrength;
         
             // depth
             sampler2D _CameraDepthTexture;
@@ -43,7 +56,6 @@ Shader "Custom/Water" {
             struct v2f {
                 float2 uv                  : TEXCOORD0;
                 float4 screenPos           : TEXCOORD1;
-                float3 camRelativeWorldPos : TEXCOORD2;
                 float3 worldPos            : TEXCOORD3;
                 float4 vertex              : SV_POSITION;
             };
@@ -163,14 +175,12 @@ Shader "Custom/Water" {
                 v2f o;
 
                 // WAVES
-                v.vertex.y += (fbm(v.uv * 2.0 + _Time.y * 0.1) - 1.0) * 1.0;
+                v.vertex.y += (fbm(v.uv * 2.0 + _Time.y * 0.1) - 1.0) * 1.2;
 
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex);
                 o.uv = v.uv;
                 o.screenPos = ComputeScreenPos(o.vertex);
-
-                o.camRelativeWorldPos = mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1.0)).xyz - _WorldSpaceCameraPos;
 
                 return o;
             }
@@ -182,13 +192,21 @@ Shader "Custom/Water" {
 
                 // DEPTH
                 float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, UVscreen));
-                float3 viewPlane = i.camRelativeWorldPos.xyz / dot(i.camRelativeWorldPos.xyz, unity_WorldToCamera._m20_m21_m22);
-                float3 worldPos = viewPlane * depth + _WorldSpaceCameraPos;
-                worldPos = mul(unity_CameraToWorld, float4(worldPos, 1.0));
+                float depthForCol = pow(saturate(_DepthStrength * (depth - i.screenPos.w)), 0.5);
 
-                // DEPTH COL
-                float depthForCol = saturate(_DepthStrength * (depth - i.screenPos.w));
-                col = _ColDepth * depthForCol;
+                // VORONOI ZONES
+                float voronoiZones = pow((noise(i.uv * 5.0 + _Time.y * 0.2) * 0.5 + 0.5), 4.0);
+
+                // MAIN WATER COLOR
+                float4 colSurface = lerp(_ColSurf1, _ColSurf2, pow(voronoiZones, 0.5));
+                col = lerp(colSurface, _ColDepth, depthForCol);
+
+                // VORONOI
+                float nse = fbm(i.uv * 50.0);
+                float2 uvDistort = float2(i.uv * 30.0 + nse * 0.6);
+                cellData cell = cellCoords(uvDistort);
+                float vor = smoothstep(_VoronoiWidth, _VoronoiWidth - 0.02, cell.bd) * voronoiZones;
+                col += vor * _ColVor;
 
                 // FOAMLINE
                 float foam = 1.0 - saturate(_EdgeWidth * (depth - i.screenPos.w)) + (noise(i.uv * 30.0) * 0.5 + 0.5) * 0.3;
@@ -196,14 +214,50 @@ Shader "Custom/Water" {
                 foam = smoothstep(0.5, 0.52, foamSin) - smoothstep(1.5, 1.52, foamSin) * foam;
                 foam *= (noise(i.uv * 20.0) * 0.5 + 0.5);
                 foam = saturate(foam + (1.0 - saturate(_EdgeWidth * 10.0 * (depth - i.screenPos.w))));
-                col += lerp(_ColWater, _ColEdge, foam) * (1.0 - depthForCol);
+                col += foam * _ColEdge;
 
-                // VORONOI
-                float nse = fbm(i.uv * 50.0);
-                float2 uvDistort = float2(i.uv * 30.0 + nse * 0.6);
-                cellData cell = cellCoords(uvDistort);
-                float vor = smoothstep(_VoronoiWidth, _VoronoiWidth - 0.02, cell.bd) * pow((noise(i.uv * 5.0 + _Time.y * 0.2) * 0.5 + 0.5), 4.0);
-                col += vor * _ColVor;
+                // NORMALS
+                float2 p = i.uv * 20.0;
+                float2 q;
+                q.x = (noise(p + float2(6.9, 0.0)) * 0.5 + 0.5) * 0.08;
+                q.y = (noise(p + float2(5.2, 1.3)) * 0.5 + 0.5) * 0.6 + _Time.y * 0.2;
+                float2 UVnorm = p + 4.0 * q;
+                float NseNormals = noise(UVnorm) * 0.5 + 0.5;
+
+                float2 offset = float2(0.01, 0.0);
+                float fdx = (noise(UVnorm + offset.xy) * 0.5 + 0.5) - NseNormals;
+                float fdy = (noise(UVnorm + offset.yx) * 0.5 + 0.5) - NseNormals;
+
+                float3 normal = normalize(float3(fdx, _WavesStrength, fdy));
+
+                // SPECULAR
+                float3 L;
+                float dist;
+                #if defined(POINT) || defined(SPOT) || defined(POINT_COOKIE)
+                    L = normalize(_WorldSpaceLightPos0.xyz - i.worldPos);
+                    dist = length(_WorldSpaceLightPos0 - i.worldPos);
+                #else 
+                    L = normalize(_WorldSpaceLightPos0.xyz);
+                    dist = 1.0;
+                #endif
+                float3 V = normalize(_WorldSpaceCameraPos - i.worldPos);
+                float3 N = normal;
+                float3 H = normalize(L + V);
+
+                float4 specCol = _ColSpec * pow(max(0.0, dot(N, H)), _Q);
+
+                col += specCol * (length(specCol) > 0.5);
+
+                // INDDIRECT LIGHT
+                float3 indirectSpec = 0.0;
+                float3 indirectDif = 0.0;
+                #if defined(FORWARD_BASE_PASS)
+                    indirectDif += max(0, ShadeSH9(float4(normal, 1)));
+                    float3 reflectionDir = reflect(-V, normal);
+                    float4 envSample = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflectionDir);
+                    indirectSpec = DecodeHDR(envSample, unity_SpecCube0_HDR);
+                #endif
+                col.rgb += indirectSpec * 0.5 * (length(indirectSpec) > 0.5);
 
                 return saturate(col);
             }
