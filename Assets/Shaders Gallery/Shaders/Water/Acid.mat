@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Water
+  m_Name: Acid
   m_Shader: {fileID: 4800000, guid: cac04a25755f8d4448a9ce5e48255bb3, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -63,11 +63,11 @@ Material:
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
-    - _DepthStrength: 0.87
+    - _DepthStrength: 0.73
     - _DetailNormalMapScale: 1
-    - _Distortion: 0.026
+    - _Distortion: 0.015
     - _DstBlend: 0
-    - _EdgeWidth: 0.29
+    - _EdgeWidth: 0.36
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -80,18 +80,18 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _SurfTrans: 0.253
+    - _SurfTrans: 0
     - _UVSec: 0
-    - _VoronoiWidth: 0.076
+    - _VoronoiWidth: 0.104
     - _WavesStrength: 0.927
     - _ZWrite: 1
     m_Colors:
-    - _ColDepth: {r: 0.10980386, g: 0.6058649, b: 1, a: 1}
-    - _ColEdge: {r: 1, g: 1, b: 1, a: 1}
+    - _ColDepth: {r: 0, g: 0.18490559, b: 0.102476604, a: 1}
+    - _ColEdge: {r: 0, g: 0.8113208, b: 0.042929377, a: 1}
     - _ColSpec: {r: 1, g: 1, b: 1, a: 0.5}
-    - _ColSurf1: {r: 0.33773574, g: 0.99125236, b: 1, a: 0.72156864}
-    - _ColSurf2: {r: 0.15105519, g: 0.11797073, b: 0.9924528, a: 0.53333336}
-    - _ColVor: {r: 0.509434, g: 0.509434, b: 0.509434, a: 1}
+    - _ColSurf1: {r: 0.004799094, g: 0.4415095, b: 0, a: 0.72156864}
+    - _ColSurf2: {r: 0, g: 0.97735846, b: 0.104378, a: 0.53333336}
+    - _ColVor: {r: 0, g: 0.645283, b: 0.11640406, a: 0.9764706}
     - _ColWater: {r: 0, g: 0.7670703, b: 1, a: 0.77254903}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

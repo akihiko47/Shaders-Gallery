@@ -14,11 +14,13 @@ Shader "Custom/Water" {
 
         [Header(Settings)]
         [Space(10)]
-        _EdgeWidth ("Edge Line Width", Float) = 0.5
-        _DepthStrength ("Depth Strength", Float) = 0.5
-        _VoronoiWidth ("Voronoi Width", Float) = 0.5
-        _Q ("Specular Power", Float) = 0.5
-        _WavesStrength ("Waves Strength", Float) = 0.05
+        _EdgeWidth ("Edge Line Width", Range(0.0, 2.0)) = 0.3
+        _DepthStrength ("Depth Strength", Range(0.0, 3.0)) = 0.5
+        _VoronoiWidth ("Voronoi Width",  Range(0.0, 1.0)) = 0.5
+        _Q ("Specular Power", Range(0.0, 1000.0)) = 0.5
+        _NormalsStrength ("Normals Strength", Range(0.0, 1.0)) = 0.05
+        _SurfTrans ("Surface Transparency", Range(0.0, 1.0)) = 0.5
+        _Distortion ("Distortion Amount", Range(0.0, 0.2)) = 0.1
     }
 
     SubShader {
@@ -26,7 +28,12 @@ Shader "Custom/Water" {
 
         Cull Off
         ZWrite Off
-        Blend SrcAlpha OneMinusSrcAlpha
+        Blend One Zero
+
+        GrabPass
+        {
+            "_BGTex"
+        }
 
         Pass {
 
@@ -43,10 +50,13 @@ Shader "Custom/Water" {
             #define FORWARD_BASE_PASS
 
             float4 _ColSurf1, _ColSurf2, _ColEdge, _ColVor, _ColDepth, _ColSpec;
-            float _EdgeWidth, _DepthStrength, _VoronoiWidth, _Q, _WavesStrength;
+            float _EdgeWidth, _DepthStrength, _VoronoiWidth, _Q, _NormalsStrength, _Distortion, _SurfTrans;
         
             // depth
             sampler2D _CameraDepthTexture;
+
+            // get pass
+            sampler2D _BGTex;
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -188,17 +198,25 @@ Shader "Custom/Water" {
             float4 frag (v2f i) : SV_Target{
                 float2 UVscreen = i.screenPos.xy / i.screenPos.w;
 
-                float4 col = 0.0;
+                float3 col = 0.0;
+
+                // COORDINATES
+                float2 UVbg = UVscreen + noise(i.uv * 50.0 + _Time.y) * _Distortion;
 
                 // DEPTH
-                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, UVscreen));
-                float depthForCol = pow(saturate(_DepthStrength * (depth - i.screenPos.w)), 0.5);
+                float depth        = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, UVscreen));
+                float depthDistort = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, UVbg));
+                float depthForCol  = pow(saturate(_DepthStrength * (depthDistort - i.screenPos.w)), 0.5);
 
                 // VORONOI ZONES
                 float voronoiZones = pow((noise(i.uv * 5.0 + _Time.y * 0.2) * 0.5 + 0.5), 4.0);
 
+                // BACKGROUND COLOR
+                float3 bg = tex2D(_BGTex, UVbg).rgb;
+
                 // MAIN WATER COLOR
-                float4 colSurface = lerp(_ColSurf1, _ColSurf2, pow(voronoiZones, 0.5));
+                float3 colSurface = lerp(_ColSurf1, _ColSurf2, pow(voronoiZones, 0.5));
+                colSurface = lerp(colSurface, bg, _SurfTrans);
                 col = lerp(colSurface, _ColDepth, depthForCol);
 
                 // VORONOI
@@ -209,15 +227,15 @@ Shader "Custom/Water" {
                 col += vor * _ColVor;
 
                 // FOAMLINE
-                float foam = 1.0 - saturate(_EdgeWidth * (depth - i.screenPos.w)) + (noise(i.uv * 30.0) * 0.5 + 0.5) * 0.3;
+                float foam = 1.0 - saturate((1.0 / _EdgeWidth) * (depth - i.screenPos.w)) + (noise(i.uv * 30.0) * 0.5 + 0.5) * 0.3;
                 float foamSin = (sin(foam * 25.0 + _Time.y * 2.0) * 0.5 + 0.5) * foam;
                 foam = smoothstep(0.5, 0.52, foamSin) - smoothstep(1.5, 1.52, foamSin) * foam;
                 foam *= (noise(i.uv * 20.0) * 0.5 + 0.5);
-                foam = saturate(foam + (1.0 - saturate(_EdgeWidth * 10.0 * (depth - i.screenPos.w))));
+                foam = saturate(foam + (1.0 - saturate((1.0 / _EdgeWidth) * 10.0 * (depth - i.screenPos.w))));
                 col += foam * _ColEdge;
 
                 // NORMALS
-                float2 p = i.uv * 20.0;
+                float2 p = i.uv * 40.0;
                 float2 q;
                 q.x = (noise(p + float2(6.9, 0.0)) * 0.5 + 0.5) * 0.08;
                 q.y = (noise(p + float2(5.2, 1.3)) * 0.5 + 0.5) * 0.6 + _Time.y * 0.2;
@@ -228,7 +246,7 @@ Shader "Custom/Water" {
                 float fdx = (noise(UVnorm + offset.xy) * 0.5 + 0.5) - NseNormals;
                 float fdy = (noise(UVnorm + offset.yx) * 0.5 + 0.5) - NseNormals;
 
-                float3 normal = normalize(float3(fdx, _WavesStrength, fdy));
+                float3 normal = normalize(float3(fdx, 1.0 - _NormalsStrength, fdy));
 
                 // SPECULAR
                 float3 L;
@@ -259,7 +277,7 @@ Shader "Custom/Water" {
                 #endif
                 col.rgb += indirectSpec * 0.5 * (length(indirectSpec) > 0.5);
 
-                return saturate(col);
+                return float4(saturate(col), 1.0);
             }
 
             ENDCG
