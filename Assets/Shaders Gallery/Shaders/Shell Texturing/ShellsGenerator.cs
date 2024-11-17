@@ -20,10 +20,22 @@ public class ShellsGenerator : MonoBehaviour {
     [SerializeField, Range(2, 1000)]
     private int _noiseDensity = 30;
 
+    [SerializeField, Range(0f, 1000f)]
+    private float _noiseScale = 30f;
+
+    [SerializeField, Range(0f, 1f)]
+    private float _randomCeof = 0.5f;
+
+    [SerializeField, Range(0f, 10f)]
+    private float _attenuation = 1.0f;
+
 
     [Header("Colors Settings")]
     [SerializeField]
     private Color _colorBase;
+
+    [SerializeField]
+    private Color _colorMiddle;
 
     [SerializeField]
     private Color _colorEdge;
@@ -102,6 +114,10 @@ public class ShellsGenerator : MonoBehaviour {
             _materials[i].SetFloat("_NoiseDensity", _noiseDensity);
             _materials[i].SetColor("_ColBase", _colorBase);
             _materials[i].SetColor("_ColEdge", _colorEdge);
+            _materials[i].SetColor("_ColMid", _colorMiddle);
+            _materials[i].SetFloat("_NoiseScale", _noiseScale);
+            _materials[i].SetFloat("_RandomCeof", _randomCeof);
+            _materials[i].SetFloat("_Attenuation", _attenuation);
         }
     }
 

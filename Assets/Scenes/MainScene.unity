@@ -1300,6 +1300,60 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 5a3581dc81e5efb49bdb38b44caf67bf, type: 3}
   m_PrefabInstance: {fileID: 380185770}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &401327234
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 401327235}
+  - component: {fileID: 401327236}
+  m_Layer: 0
+  m_Name: Shell Texturing Grass
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &401327235
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 401327234}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.70710677, y: -0, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 69, y: 0, z: 0}
+  m_LocalScale: {x: 5, y: 5, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 973590623}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &401327236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 401327234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1955142f347d7a34a933467cd6008757, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _shellMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  _shellMaterial: {fileID: 2100000, guid: 6e2cce71904b0b84bb276b1bfd4166dd, type: 2}
+  _totalShells: 32
+  _shellsDistance: 0.4
+  _noiseDensity: 250
+  _noiseScale: 6
+  _randomCeof: 0.35
+  _colorBase: {r: 0, g: 0, b: 0, a: 0}
+  _colorMiddle: {r: 0, g: 0.07058824, b: 0.015686275, a: 0}
+  _colorEdge: {r: 0.23137255, g: 0.54901963, b: 0.14901961, a: 0}
 --- !u!1 &500464707
 GameObject:
   m_ObjectHideFlags: 0
@@ -2637,6 +2691,7 @@ Transform:
   - {fileID: 721897150}
   - {fileID: 1840389553}
   - {fileID: 1088427818}
+  - {fileID: 401327235}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &994624007
@@ -3011,10 +3066,13 @@ MonoBehaviour:
   _shellMesh: {fileID: 4711208715938537054, guid: 5a3581dc81e5efb49bdb38b44caf67bf, type: 3}
   _shellMaterial: {fileID: 2100000, guid: 85fb0c5c511e53849bbe8254444266d6, type: 2}
   _totalShells: 32
-  _shellsDistance: 0.2
-  _noiseDensity: 200
-  _colorBase: {r: 0, g: 0, b: 0, a: 0}
-  _colorEdge: {r: 1, g: 1, b: 1, a: 0}
+  _shellsDistance: 0.4
+  _noiseDensity: 250
+  _noiseScale: 2
+  _randomCeof: 0.2
+  _colorBase: {r: 1, g: 1, b: 1, a: 0}
+  _colorMiddle: {r: 0, g: 0, b: 0, a: 0}
+  _colorEdge: {r: 0.93333334, g: 0.23137255, b: 0.1764706, a: 0}
 --- !u!1 &1112078791
 GameObject:
   m_ObjectHideFlags: 0
