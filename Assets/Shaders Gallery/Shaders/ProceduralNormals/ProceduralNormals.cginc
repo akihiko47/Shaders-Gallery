@@ -9,9 +9,9 @@ float4 _ColDif1, _ColDif2, _ColSpec, _ColAmb;
 float _Q, _NormalsCoef;
 
 struct appdata{
-    float4 vertex : POSITION;
-    float2 uv     : TEXCOORD0;
-    float3 normal : NORMAL;
+    float4 vertex  : POSITION;
+    float2 uv      : TEXCOORD0;
+    float3 normal  : NORMAL;
     float4 tangent : TANGENT;
 };
 
