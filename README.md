@@ -8,6 +8,18 @@ Many of them have settings such as color, etc. Feel free to use these shaders wh
 ## Gallery 🖼️
 *(might take some time to load)*
 
+!["Water"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/water.jpg)
+
+!["Grass"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/grass.jpg)
+
+!["Acid"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/acid.jpg)
+
+!["Shells"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/shells.jpg)
+
+!["Stencil"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/stencil.jpg)
+
+!["Glass"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/glass.jpg)
+
 !["Thing"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/thing.gif)
 
 !["Marble"](https://github.com/akihiko47/The-Book-Of-Shaders-Unity/blob/main/Images/marble.gif)

@@ -1347,7 +1347,7 @@ MonoBehaviour:
   _shellMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   _shellMaterial: {fileID: 2100000, guid: 6e2cce71904b0b84bb276b1bfd4166dd, type: 2}
   _totalShells: 32
-  _shellsDistance: 0.4
+  _shellsDistance: 0.1
   _noiseDensity: 500
   _noiseScale: 6
   _randomCeof: 0.35
