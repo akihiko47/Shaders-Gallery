@@ -18,6 +18,7 @@ Shader "RayMarching/RayMarcherBase" {
             #define SURF_DIST 0.01
 
             #include "UnityCG.cginc"
+            #include "DistanceFunctions.cginc"
 
             sampler2D _MainTex;
             uniform float3 _CameraWorldPos;
@@ -39,17 +40,9 @@ Shader "RayMarching/RayMarcherBase" {
                 float3 ray: TEXCOORD2;
             };
 
-            float sdTorus(float3 p, float2 t) {
-                float2 q = float2(length(p.xz) - t.x, p.y);
-                return length(q) - t.y;
-            }
-
             float GetDist(float3 pnt) {
-                float4 sphere = float4(1.0, 1.0, 1.0, 0.5);
-                float dS = length(pnt - sphere.xyz) - sphere.w;
-                //float dT = sdTorus(pnt, float2(1, 0.2));
-                //float dP = pnt.y;
-
+                float dS = sdSphere(pnt - float3(0.0, 1.0, 0.0), 0.5);
+                //CutWithPlane(dS, pnt, normalize(float3(-1.0, 1.0, -1.0)));
 
                 float d = dS;
                 return d;
@@ -84,11 +77,12 @@ Shader "RayMarching/RayMarcherBase" {
             float4 frag(v2f i) : SV_Target{
 
                 // DEPTH TEXTURE
-                float depth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uvOriginal));
+                float depth = LinearEyeDepth(tex2D(_CameraDepthTexture, i.uvOriginal).r);
+                depth *= length(i.ray);  // convert depth to distance
 
                 // MARCHING
                 float3 rayOrigin = _CameraWorldPos;
-                float3 rayDir = normalize(i.ray);
+                float3 rayDir = normalize(i.ray);   
 
                 float OriginDistance = 0.0;
 
@@ -96,7 +90,7 @@ Shader "RayMarching/RayMarcherBase" {
                     float3 pnt = rayOrigin + rayDir * OriginDistance;
                     float deltaDistance = GetDist(pnt);
                     OriginDistance += deltaDistance;
-                    if (OriginDistance < SURF_DIST || OriginDistance > MAX_DIST || OriginDistance >= depth) break;
+                    if (OriginDistance < SURF_DIST || OriginDistance > MAX_DIST || deltaDistance >= depth) break;
                 };
                 float dist = OriginDistance;
 
