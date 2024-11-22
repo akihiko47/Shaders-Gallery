@@ -42,7 +42,9 @@ Shader "RayMarching/RayMarcherBase" {
 
             float GetDist(float3 pnt) {
                 float dS = sdSphere(pnt - float3(0.0, 1.0, 0.0), 0.5);
-                //CutWithPlane(dS, pnt, normalize(float3(-1.0, 1.0, -1.0)));
+                Shell(dS, 0.05);
+                CutWithPlane(dS, pnt - float3(0.0, 1.0, 0.0), normalize(float3(1.0, 1.0, 0.0)));
+                // more operations in "DistanceFunctions.cginc"
 
                 float d = dS;
                 return d;

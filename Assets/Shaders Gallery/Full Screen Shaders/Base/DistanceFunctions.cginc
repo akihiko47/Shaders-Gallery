@@ -130,7 +130,7 @@ void Shell(inout float d, float shellSize){
 // p: point on plane
 // n: plane normal
 void CutWithPlane(inout float d, float3 p, float3 n){
-    float cutPlaneD = dot(p, normalize(float3(-1.0, 1.0, -1.0)));  // Creating plane
+    float cutPlaneD = dot(p, normalize(n));  // Creating plane
     d = max(cutPlaneD, d);  // Cutting with plane
 }
 
