@@ -39,15 +39,41 @@ Shader "RayMarching/RayMarcherBase" {
                 float2 uvOriginal :TEXCOORD01;
                 float3 ray: TEXCOORD2;
             };
+            
+            float GetDist(float3 p) {
+                float dS = sdSphere(p - float3(0.0, 1.2, 0.0), 1.5);
 
-            float GetDist(float3 pnt) {
-                float dS = sdSphere(pnt - float3(0.0, 1.0, 0.0), 0.5);
-                Shell(dS, 0.05);
-                CutWithPlane(dS, pnt - float3(0.0, 1.0, 0.0), normalize(float3(1.0, 1.0, 0.0)));
+                float dB = sdRoundBox(p - float3(0.0, 1.2, 0.0), float3(1.0, 1.0, 1.0), 0.2);
+                dB = opSS(dS, dB, 0.1);
+
+                float dP = sdPlane(p, normalize(float3(0.0, 1.0, 0.0)));
                 // more operations in "DistanceFunctions.cginc"
 
-                float d = dS;
+                float d = opU(dB, dP);
                 return d;
+            }
+
+            float hardShadows(float3 ro, float3 rd, float mint, float maxt){
+                float t = mint;
+                while(t < maxt){
+                    float h = GetDist(ro + rd * t);
+                    t += h;
+                    if(h < SURF_DIST) return 0.0;
+                }
+                return 1.0;
+            }
+
+            float softShadows(float3 ro, float3 rd, float mint, float maxt, float k){
+                float result = 1.0;
+
+                float t = mint;
+                while(t < maxt){
+                    float h = GetDist(ro + rd * t);
+                    t += h;
+                    result = min(result, k * h / t);
+                    if(h < SURF_DIST) return 0.0;
+                }
+                return result;
             }
 
             float3 GetNormal(float3 pnt) {
@@ -97,15 +123,17 @@ Shader "RayMarching/RayMarcherBase" {
                 float dist = OriginDistance;
 
                 float4 color = float4(0.0, 0.0, 0.0, 1.0);
-                color.w = (dist >= SURF_DIST) && (dist <= MAX_DIST) && (dist <= depth);
+                color.w = (dist >= SURF_DIST) && (dist <= MAX_DIST);
+
+                color.w *= (dist <= depth); // for scene blending
 
                 float3 pnt = rayOrigin + rayDir * dist;
 
                 // LIGHT
-                float3 albedo = float3(0.7, 0.0, 0.0);
+                float3 albedo = float3(0.7, 0.9, 1.0);
                 float3 ambient = float3(0.0, 0.0, 0.02);
 
-                float3 lightColor = float3(1, 0.8, 0.5) * 0.5;
+                float3 lightColor = float3(1, 1.0, 1.0) * 0.9;
                 float3 dirLightDir = normalize(float3(1, 1, 1));
                 float3 lightPos = float3(0.0, 5.0, 6.0);
 
@@ -121,7 +149,7 @@ Shader "RayMarching/RayMarcherBase" {
                 //float attenuation = 1 / (1 + dot(lightVec, lightVec));
                 //lightColor *= attenuation;
 
-                float3 diffuse = saturate(dot(L, N));
+                float3 diffuse = saturate(dot(L, N)) * 0.5 + 0.5;
                 diffuse *= lightColor;
                 float3 specular = pow(saturate(dot(N, H)), 70.0) * (diffuse > 0);
                 specular *= lightColor;
@@ -129,10 +157,11 @@ Shader "RayMarching/RayMarcherBase" {
                 color.rgb = albedo * diffuse + specular;
 
 
-                // SHADOWS
-                //float lightDistance = length(lightPos - pnt);
-                //float rayToLightLength = RayMarch(pnt + N * SURF_DIST * 8.0, L);
-                //color.rgb *= !(rayToLightLength < lightDistance);
+                // HARD SHADOWS raymarch(ro, rd, minDist, maxDist)
+                // color.rgb *= hardShadows(pnt, L, 0.05, 100) * 0.5 + 0.5;
+
+                // SOFT SHADOWS raymarch(ro, rd, minDist, maxDist, softness)
+                color.rgb *= softShadows(pnt, L, 0.05, 100, 5.0) * 0.5 + 0.5;
 
                 // AMBIENT
                 //color.rgb += ambient;
@@ -144,7 +173,7 @@ Shader "RayMarching/RayMarcherBase" {
                 color.rgb = lerp(fogColor, color, fog);*/
 
                 // BLENDING
-                //return float4(color);
+                // return float4(color);
                 float4 originalColor = tex2D(_MainTex, i.uvOriginal);
                 return float4(originalColor * (1.0 - color.w) + color.xyz * color.w, 1.0);
             }

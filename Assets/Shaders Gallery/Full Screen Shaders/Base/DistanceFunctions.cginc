@@ -1,5 +1,9 @@
 ﻿// DISTANCE FUNCTIONS //
 
+float sdPlane(float3 p, float3 n){
+    return dot(p, n);
+}
+
 float sdSphere(float3 p, float s){
 	return length(p) - s;
 }
@@ -8,6 +12,11 @@ float sdBox(float3 p, float3 b){
 	float3 d = abs(p) - b;
 	return min(max(d.x, max(d.y, d.z)), 0.0) +
 		length(max(d, 0.0));
+}
+
+float sdRoundBox(float3 p, float3 b, float r){
+    float3 q = abs(p) - b;
+    return min(max(q.x, max(q.y, q.z)), 0.0) + length(max(q, 0.0)) - r;
 }
 
 float sdTorus(float3 p, float R, float r){
@@ -77,6 +86,24 @@ float opI(float d1, float d2){
 // Lerping
 float opL(float d1, float d2, float t){
     return lerp(d1, d2, t);
+}
+
+// Smooth union
+float opUS(float d1, float d2, float k){
+    float h = saturate(0.5 + 0.5 * (d2 - d1) / k);
+    return lerp(d2, d1, h) - k * h * (1.0 - h);
+}
+
+// Smooth subtraction
+float opSS(float d1, float d2, float k){
+    float h = saturate(0.5 - 0.5 * (d2 + d1) / k);
+    return lerp(d2, -d1, h) + k * h * (1.0 - h);
+}
+
+// Smooth intersection
+float opIS(float d1, float d2, float k){
+    float h = saturate(0.5 - 0.5 * (d2 - d1) / k);
+    return lerp(d2, d1, h) + k * h * (1.0 - h);
 }
 
 
