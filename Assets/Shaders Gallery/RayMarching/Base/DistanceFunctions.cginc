@@ -80,6 +80,13 @@ float sdFractal(float3 pos){
 
 
 // BOOLEAN OPERATORS //
+material BlendMaterials(material mat1, material mat2, float h){
+    material mat;
+    mat.kd = lerp(mat1.kd, mat2.kd, h);
+    mat.ks = lerp(mat1.ks, mat2.ks, h);
+    mat.q  = lerp(mat1.q,  mat2.q,  h);
+    return mat;
+}
 
 // Union
 hitInfo opU(hitInfo d1, hitInfo d2){
@@ -88,9 +95,11 @@ hitInfo opU(hitInfo d1, hitInfo d2){
 
     hitInfo res;
     res.d = d;
-    res.mat.kd = first? d1.mat.kd : d2.mat.kd;
-    res.mat.ks = first? d1.mat.ks : d2.mat.ks;
-    res.mat.q = first? d1.mat.q : d2.mat.q;
+    if(first){
+        res.mat = d1.mat;
+    }else{
+        res.mat = d2.mat;
+    }
     return res; 
 }
 
@@ -101,9 +110,7 @@ hitInfo opS(hitInfo d1, hitInfo d2){
 
     hitInfo res;
     res.d = d;
-    res.mat.kd = d2.mat.kd;
-    res.mat.ks = d2.mat.ks;
-    res.mat.q = d2.mat.q;
+    res.mat = d2.mat;
     return res;
 }
 
@@ -114,9 +121,12 @@ hitInfo opI(hitInfo d1, hitInfo d2){
 
     hitInfo res;
     res.d = d;
-    res.mat.kd = first ? d1.mat.kd : d2.mat.kd;
-    res.mat.ks = first ? d1.mat.ks : d2.mat.ks;
-    res.mat.q = first ? d1.mat.q : d2.mat.q;
+    if(first){
+        res.mat = d1.mat;
+    }else{
+        res.mat = d2.mat;
+    }
+    
     return res;
 }
 
@@ -124,9 +134,8 @@ hitInfo opI(hitInfo d1, hitInfo d2){
 hitInfo opL(hitInfo d1, hitInfo d2, float t){
     hitInfo res;
     res.d = lerp(d1.d, d2.d, t);
-    res.mat.kd = lerp(d2.mat.kd, d1.mat.kd, t);
-    res.mat.ks = lerp(d2.mat.ks, d1.mat.ks, t);
-    res.mat.q = lerp(d2.mat.q, d1.mat.q, t);
+    res.mat = BlendMaterials(d2.mat, d1.mat, t);
+
     return res;
 }
 
@@ -136,10 +145,8 @@ hitInfo opUS(hitInfo d1, hitInfo d2, float k){
 
     hitInfo res;
     res.d = lerp(d2.d, d1.d, h) - k * h * (1.0 - h);
+    res.mat = BlendMaterials(d2.mat, d1.mat, h);
 
-    res.mat.kd = lerp(d2.mat.kd, d1.mat.kd, h);
-    res.mat.ks = lerp(d2.mat.ks, d1.mat.ks, h);
-    res.mat.q = lerp(d2.mat.q, d1.mat.q, h);
     return res;
 }
 
@@ -149,10 +156,8 @@ hitInfo opSS(hitInfo d1, hitInfo d2, float k){
 
     hitInfo res;
     res.d = lerp(d2.d, -d1.d, h) + k * h * (1.0 - h);
+    res.mat = BlendMaterials(d2.mat, d1.mat, h);
 
-    res.mat.kd = lerp(d2.mat.kd, d1.mat.kd, h);
-    res.mat.ks = lerp(d2.mat.ks, d1.mat.ks, h);
-    res.mat.q = lerp(d2.mat.q, d1.mat.q, h);
     return res;
 }
 
@@ -162,10 +167,8 @@ hitInfo opIS(hitInfo d1, hitInfo d2, float k){
 
     hitInfo res;
     res.d = lerp(d2.d, d1.d, h) + k * h * (1.0 - h);
+    res.mat = BlendMaterials(d2.mat, d1.mat, h);
 
-    res.mat.kd = lerp(d2.mat.kd, d1.mat.kd, h);
-    res.mat.ks = lerp(d2.mat.ks, d1.mat.ks, h);
-    res.mat.q = lerp(d2.mat.q, d1.mat.q, h);
     return res;
 }
 

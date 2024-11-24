@@ -2646,13 +2646,13 @@ MonoBehaviour:
   _blendOnScene: 1
   _renderDistance: 200
   _maxSteps: 250
-  _surfDist: 0.002
+  _surfDist: 0.001
   _usePointLight: 0
   _directionalLight: {fileID: 1658801571}
   _pointLight: {fileID: 1822469197}
   _useSoftShadows: 1
   _shadowsIntensity: 1
-  _shadowsDistance: {x: 0.1, y: 100}
+  _shadowsDistance: {x: 0.2, y: 100}
   _shadowsSoftness: 6.5
   _aoStep: 0.32
   _aoIntensity: 0.171
