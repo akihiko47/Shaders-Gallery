@@ -20,10 +20,10 @@ RenderSettings:
   m_FogDensity: 0.06
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.14901961, g: 0.16862746, b: 0.26666668, a: 1}
+  m_AmbientSkyColor: {r: 0.59607846, g: 0.6745098, b: 1.0666667, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 0.8
+  m_AmbientIntensity: 0.74
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 133347283e115d147a5fcce7f47a538f, type: 2}
@@ -97,7 +97,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 119f102f61b4e3e40b31520a8b7b3062, type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -2657,9 +2657,9 @@ MonoBehaviour:
   _aoStep: 0.2
   _aoIntensity: 0.2
   _aoIterations: 3
-  _useAmbMap: 0
+  _useUnitySkybox: 0
   _ambMap: {fileID: 8900000, guid: 15941f70fce71784da1321794120ea6a, type: 3}
-  _ambColor: {r: 0, g: 0.14665523, b: 0.21509439, a: 1}
+  _ambColor: {r: 0.049918115, g: 0.20861147, b: 0.21509439, a: 1}
 --- !u!1 &973590622
 GameObject:
   m_ObjectHideFlags: 0
@@ -4881,7 +4881,7 @@ Transform:
   m_GameObject: {fileID: 1822469195}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.411, z: 0}
+  m_LocalPosition: {x: 0, y: 18.911, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5411,7 +5411,7 @@ Transform:
   m_GameObject: {fileID: 2024820304}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.25, z: 0}
   m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -6,10 +6,15 @@ Shader "RayMarching/RayMarcherBase" {
 
     SubShader {
 
+        Tags { "RenderType" = "Overlay" "Queue" = "Overlay"}
+
         Cull Off ZWrite Off ZTest Always
 
         Pass {
+            Tags { "LightMode" = "ForwardBase" }
+
             CGPROGRAM
+            #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile __ RM_SOFT_SHADOWS_ON 
@@ -44,7 +49,6 @@ Shader "RayMarching/RayMarcherBase" {
             uniform float       _AoStep;
             uniform float       _AoInt;
             uniform int         _AoIterations;
-            uniform samplerCUBE _AmbMap;
             uniform float4      _AmbCol;
 
             // depth texture
@@ -152,7 +156,11 @@ Shader "RayMarching/RayMarcherBase" {
                     float3 pnt = rayOrigin + rayDir * OriginDistance;
                     float deltaDistance = GetDist(pnt);
                     OriginDistance += deltaDistance;
-                    if (OriginDistance < _SurfDist || OriginDistance > _MaxDist || deltaDistance >= depth) break;
+                    if (OriginDistance < _SurfDist || OriginDistance > _MaxDist) break;
+                    #ifdef RM_BLEND_ON_SCENE
+                        if(deltaDistance >= depth) break;
+                    #endif
+
                 };
                 float dist = OriginDistance;
 
@@ -166,10 +174,17 @@ Shader "RayMarching/RayMarcherBase" {
                 float3 pnt = rayOrigin + rayDir * dist;
 
                 // LIGHT
+                float3 N = GetNormal(pnt);
+                float3 V = normalize(_CameraWorldPos - pnt);
+
+                float  q = 500.0;
                 float3 kd = float3(0.7, 0.9, 1.0);
                 float3 ks = float3(1.0, 1.0, 1.0);
-                float3 ka = _AmbCol.rgb;
-                float  q  = 500.0;
+                #ifdef RM_AMB_MAP_ON
+                    float3 ka = max(0, ShadeSH9(float4(N, 1.0)));
+                #else
+                    float3 ka = _AmbCol.rgb;
+                #endif 
 
                 #ifdef RM_POINT_LIGHT_ON
                     float3 L = normalize(_PntLightPos - pnt);
@@ -181,8 +196,6 @@ Shader "RayMarching/RayMarcherBase" {
                     float3 L = _DirLightDir;
                     float3 lightColor = saturate(_DirLightCol * _DirLightInt);
                 #endif
-                float3 N = GetNormal(pnt);
-                float3 V = normalize(_CameraWorldPos - pnt);
                 float3 H = normalize(L + V);
 
                 // Blinn-Phong BRDF

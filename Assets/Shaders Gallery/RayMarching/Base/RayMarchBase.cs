@@ -61,9 +61,7 @@ public class RayMarchBase : MonoBehaviour {
 
     [Header("Ambient Light")]
     [SerializeField]
-    private bool _useAmbMap;
-    [SerializeField]
-    private Cubemap _ambMap;
+    private bool _useUnityAmbient;
     [SerializeField]
     private Color _ambColor;
 
@@ -130,7 +128,7 @@ public class RayMarchBase : MonoBehaviour {
         _renderMaterial.SetKeyword(_useSoftShadowsKwd, _useSoftShadows);
         _renderMaterial.SetKeyword(_blendOnSceneKwd, _blendOnScene);
         _renderMaterial.SetKeyword(_usePointLightKwd, _usePointLight);
-        _renderMaterial.SetKeyword(_useAmbMapKwd, _useAmbMap);
+        _renderMaterial.SetKeyword(_useAmbMapKwd, _useUnityAmbient);
 
 
         CustomGraphicsBlit(source, destination, _renderMaterial, 0);
