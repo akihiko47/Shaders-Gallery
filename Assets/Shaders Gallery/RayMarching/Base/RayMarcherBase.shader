@@ -81,21 +81,25 @@ Shader "RayMarching/RayMarcherBase" {
             
             hitInfo GetDist(float3 p) { 
                 hitInfo dS;
-                dS.d = sdSphere(p - float3(0.0, 1.5, 0.0), 1.0);
+                dS.d = sdSphere(p - float3(1.5, 1.2, 0.0), 1.0);
+                dS.mat.kd = float3(0.0, 0.0, 1.0);
+                dS.mat.ks = float3(1.0, 1.0, 1.0);
+                dS.mat.q = 5000.0;
 
                 hitInfo dB;
-                dB.d = sdRoundBox(p - float3(0.0, 1.5, 0.0), float3(1.0, 1.0, 1.0), 0.5);
-                dB.d = opSS(dS.d, dB.d, 1.7);
+                dB.d = sdRoundBox(p - float3(0.0, 1.2, 0.0), float3(1.0, 1.0, 1.0), 0.2);
                 dB.mat.kd = float3(1.0, 0.0, 0.0);
                 dB.mat.ks = float3(1.0, 1.0, 1.0);
-                dB.mat.q  = 100.0;
+                dB.mat.q  = 10.0;
+
+                dB = opUS(dS, dB, 0.5);
 
                 hitInfo dP;
                 dP.d = sdPlane(p, normalize(float3(0.0, 1.0, 0.0)));
                 // more operations in "DistanceFunctions.cginc"
                 dP.mat.kd = float3(1.0, 1.0, 1.0);
                 dP.mat.ks = float3(1.0, 1.0, 1.0);
-                dP.mat.q = 500.0;
+                dP.mat.q = 100.0;
 
                 hitInfo res; 
                 res = opU(dB, dP);

@@ -2655,7 +2655,7 @@ MonoBehaviour:
   _shadowsDistance: {x: 0.05, y: 100}
   _shadowsSoftness: 6.5
   _aoStep: 0.2
-  _aoIntensity: 0.2
+  _aoIntensity: 0.21
   _aoIterations: 3
   _useUnityAmbient: 0
   _ambColor: {r: 0, g: 0.07924521, b: 0.07433994, a: 1}
@@ -4400,13 +4400,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1658801569}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.0132574905, y: -0.56603235, z: 0.82263565, w: -0.05198262}
+  m_LocalRotation: {x: -0.15305008, y: -0.43430063, z: 0.86178744, w: 0.21279375}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1605507202}
-  m_LocalEulerAnglesHint: {x: 68.853, y: 5.892, z: 191.272}
+  m_LocalEulerAnglesHint: {x: 43.111, y: -37.918, z: 136.804}
 --- !u!108 &1658801571
 Light:
   m_ObjectHideFlags: 0

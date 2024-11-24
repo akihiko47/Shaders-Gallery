@@ -94,37 +94,79 @@ hitInfo opU(hitInfo d1, hitInfo d2){
     return res; 
 }
 
-// Subtraction
-float opS(float d1, float d2){
-	return max(-d1, d2);
+// Subtraction (what from where)
+hitInfo opS(hitInfo d1, hitInfo d2){
+    float d = max(-d1.d, d2.d);
+    bool first = (d == d1.d);
+
+    hitInfo res;
+    res.d = d;
+    res.mat.kd = d2.mat.kd;
+    res.mat.ks = d2.mat.ks;
+    res.mat.q = d2.mat.q;
+    return res;
 }
 
 // Intersection
-float opI(float d1, float d2){
-	return max(d1, d2);
+hitInfo opI(hitInfo d1, hitInfo d2){
+    float d = max(d1.d, d2.d);
+    bool first = (d == d1.d);
+
+    hitInfo res;
+    res.d = d;
+    res.mat.kd = first ? d1.mat.kd : d2.mat.kd;
+    res.mat.ks = first ? d1.mat.ks : d2.mat.ks;
+    res.mat.q = first ? d1.mat.q : d2.mat.q;
+    return res;
 }
 
-// Lerping
-float opL(float d1, float d2, float t){
-    return lerp(d1, d2, t);
+// Lerping (between 2 shapes)
+hitInfo opL(hitInfo d1, hitInfo d2, float t){
+    hitInfo res;
+    res.d = lerp(d1.d, d2.d, t);
+    res.mat.kd = lerp(d2.mat.kd, d1.mat.kd, t);
+    res.mat.ks = lerp(d2.mat.ks, d1.mat.ks, t);
+    res.mat.q = lerp(d2.mat.q, d1.mat.q, t);
+    return res;
 }
 
 // Smooth union
-float opUS(float d1, float d2, float k){
-    float h = saturate(0.5 + 0.5 * (d2 - d1) / k);
-    return lerp(d2, d1, h) - k * h * (1.0 - h);
+hitInfo opUS(hitInfo d1, hitInfo d2, float k){
+    float h = saturate(0.5 + 0.5 * (d2.d - d1.d) / k);
+
+    hitInfo res;
+    res.d = lerp(d2.d, d1.d, h) - k * h * (1.0 - h);
+
+    res.mat.kd = lerp(d2.mat.kd, d1.mat.kd, h);
+    res.mat.ks = lerp(d2.mat.ks, d1.mat.ks, h);
+    res.mat.q = lerp(d2.mat.q, d1.mat.q, h);
+    return res;
 }
 
 // Smooth subtraction
-float opSS(float d1, float d2, float k){
-    float h = saturate(0.5 - 0.5 * (d2 + d1) / k);
-    return lerp(d2, -d1, h) + k * h * (1.0 - h);
+hitInfo opSS(hitInfo d1, hitInfo d2, float k){
+    float h = saturate(0.5 - 0.5 * (d2.d + d1.d) / k);
+
+    hitInfo res;
+    res.d = lerp(d2.d, -d1.d, h) + k * h * (1.0 - h);
+
+    res.mat.kd = lerp(d2.mat.kd, d1.mat.kd, h);
+    res.mat.ks = lerp(d2.mat.ks, d1.mat.ks, h);
+    res.mat.q = lerp(d2.mat.q, d1.mat.q, h);
+    return res;
 }
 
 // Smooth intersection
-float opIS(float d1, float d2, float k){
-    float h = saturate(0.5 - 0.5 * (d2 - d1) / k);
-    return lerp(d2, d1, h) + k * h * (1.0 - h);
+hitInfo opIS(hitInfo d1, hitInfo d2, float k){
+    float h = saturate(0.5 - 0.5 * (d2.d - d1.d) / k);
+
+    hitInfo res;
+    res.d = lerp(d2.d, d1.d, h) + k * h * (1.0 - h);
+
+    res.mat.kd = lerp(d2.mat.kd, d1.mat.kd, h);
+    res.mat.ks = lerp(d2.mat.ks, d1.mat.ks, h);
+    res.mat.q = lerp(d2.mat.q, d1.mat.q, h);
+    return res;
 }
 
 
