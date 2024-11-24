@@ -14,13 +14,13 @@ public class RayMarchBase : MonoBehaviour {
     private bool _blendOnScene = true;
 
     [SerializeField, Min(1f)]
-    private float _renderDistance = 100f;
+    private float _renderDistance = 200f;
 
     [SerializeField, Min(10)]
-    private int _maxSteps = 100;
+    private int _maxSteps = 250;
 
     [SerializeField, Min(0.0001f)]
-    private float _surfDist = 0.01f;
+    private float _surfDist = 0.002f;
 
 
     [Header("Light")]
@@ -42,7 +42,7 @@ public class RayMarchBase : MonoBehaviour {
     private float _shadowsIntensity = 1f;
 
     [SerializeField]
-    private Vector2 _shadowsDistance = new Vector2(0.05f, 100f);
+    private Vector2 _shadowsDistance = new Vector2(0.1f, 100f);
 
     [SerializeField, Range(0f, 150f)]
     private float _shadowsSoftness = 4f;

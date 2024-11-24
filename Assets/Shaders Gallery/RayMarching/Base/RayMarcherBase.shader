@@ -74,6 +74,7 @@ Shader "RayMarching/RayMarcherBase" {
 
             struct hitInfo {
                 float d;
+                float3 pnt;
                 material mat;
             };
 
@@ -140,7 +141,7 @@ Shader "RayMarching/RayMarcherBase" {
                 return 1.0 - ao * _AoInt;
             }
 
-            float3 GetNormal(float3 pnt) {
+            float3 GetNormal(float3 pnt){
                 float d = GetDist(pnt).d;
                 float2 e = float2(0.001, 0.0);
 
@@ -151,7 +152,7 @@ Shader "RayMarching/RayMarcherBase" {
                 return normalize(n);
             }
 
-            v2f vert (appdata v) {
+            v2f vert (appdata v){
                 v2f o;
 
                 half index = v.vertex.z;
@@ -166,58 +167,40 @@ Shader "RayMarching/RayMarcherBase" {
                 return o;
             }
 
-            float4 frag(v2f i) : SV_Target{
+            bool RayMarch(float3 ro, float3 rd, float depth, inout hitInfo hit){
+                float OriginDistance = _SurfDist;
 
-                // DEPTH TEXTURE
-                float depth = LinearEyeDepth(tex2D(_CameraDepthTexture, i.uvOriginal).r);
-                depth *= length(i.ray);  // convert depth to distance
-
-                // MARCHING
-                float3 rayOrigin = _CameraWorldPos;
-                float3 rayDir = normalize(i.ray);   
-
-                float OriginDistance = 0.0;
-                hitInfo hit;
-
-                for (int n = 0; n < _MaxSteps; n++) {
-                    float3 pnt = rayOrigin + rayDir * OriginDistance;
-                    hit = GetDist(pnt);
-                    float deltaDistance = hit.d;
-                    OriginDistance += deltaDistance;
-                    if (OriginDistance < _SurfDist || OriginDistance > _MaxDist) break;
+                for(int n = 0; n < _MaxSteps; n++){
+                    float3 p = ro + rd * OriginDistance;
+                    hit = GetDist(p);
+                    OriginDistance += hit.d;
+                    if(hit.d < _SurfDist){
+                        hit.pnt = p;
+                        return true;
+                    }
+                    if(OriginDistance > _MaxDist){
+                        return false;
+                    }
                     #ifdef RM_BLEND_ON_SCENE
-                        if(deltaDistance >= depth) break;
+                        if(OriginDistance >= depth){
+                            return false;
+                        }
                     #endif
-
                 };
-                float dist = OriginDistance;
+                return false;
+            }
 
-                float4 color = float4(0.0, 0.0, 0.0, 1.0);
-                color.w = (dist >= _SurfDist) && (dist <= _MaxDist);
-
-                #ifdef RM_BLEND_ON_SCENE
-                    color.w *= (dist <= depth); // for scene blending
-                #endif
-
-                float3 pnt = rayOrigin + rayDir * dist;
+            float3 Shading(hitInfo hit){
+                float3 color = 0.0;
 
                 // LIGHT
-                float3 N = GetNormal(pnt);
-                float3 V = normalize(_CameraWorldPos - pnt);
-
-                float  q  = hit.mat.q;
-                float3 kd = hit.mat.kd;
-                float3 ks = hit.mat.ks;
-                #ifdef RM_AMB_MAP_ON
-                    float3 ka = max(0, ShadeSH9(float4(N, 1.0)));
-                #else
-                    float3 ka = _AmbCol.rgb;
-                #endif 
+                float3 N = GetNormal(hit.pnt);
+                float3 V = normalize(_CameraWorldPos - hit.pnt);
 
                 #ifdef RM_POINT_LIGHT_ON
-                    float3 L = normalize(_PntLightPos - pnt);
+                    float3 L = normalize(_PntLightPos - hit.pnt);
                     float3 lightColor = _PntLightCol * _PntLightInt;
-                    float3 lightVec = _PntLightPos - pnt;
+                    float3 lightVec = _PntLightPos - hit.pnt;
                     float attenuation = 1 / dot(lightVec, lightVec);
                     lightColor = saturate(lightColor * attenuation);
                 #else
@@ -227,14 +210,24 @@ Shader "RayMarching/RayMarcherBase" {
                 float3 H = normalize(L + V);
 
                 // Blinn-Phong BRDF
+
+                float  q = hit.mat.q;
+                float3 kd = hit.mat.kd;
+                float3 ks = hit.mat.ks;
+                #ifdef RM_AMB_MAP_ON
+                    float3 ka = max(0, ShadeSH9(float4(N, 1.0)));
+                #else
+                    float3 ka = _AmbCol.rgb;
+                #endif 
+
                 color.rgb = (kd * max(0.0, dot(N, L) * 0.5 + 0.5) + ks * pow(max(0.0, dot(N, H)), q)) * lightColor + ka;
 
                 // SHADOWS
                 float shadows;
                 #ifdef RM_SOFT_SHADOWS_ON
-                    shadows = SoftShadows(pnt, L, _ShadowsDistance.x, _ShadowsDistance.y, _ShadowsSoftness) * 0.5 + 0.5;
+                    shadows = SoftShadows(hit.pnt, L, _ShadowsDistance.x, _ShadowsDistance.y, _ShadowsSoftness) * 0.5 + 0.5;
                 #else
-                    shadows = HardShadows(pnt, L, _ShadowsDistance.x, _ShadowsDistance.y) * 0.5 + 0.5;
+                    shadows = HardShadows(hit.pnt, L, _ShadowsDistance.x, _ShadowsDistance.y) * 0.5 + 0.5;
                 #endif
                 shadows = max(0.0, pow(shadows, _ShadowsIntensity));
                 color.rgb *= shadows;
@@ -246,7 +239,28 @@ Shader "RayMarching/RayMarcherBase" {
                 color.rgb = lerp(fogColor, color, fog);*/
 
                 // AMBIENT OCCLUSION
-                color.rgb *= AmbientOcclusion(pnt, N);
+                color.rgb *= AmbientOcclusion(hit.pnt, N);
+
+                return color;
+            }
+
+            float4 frag(v2f i) : SV_Target{
+
+                // DEPTH TEXTURE
+                float depth = LinearEyeDepth(tex2D(_CameraDepthTexture, i.uvOriginal).r);
+                depth *= length(i.ray);  // convert depth to distance
+
+                float3 ro = _CameraWorldPos;
+                float3 rd = normalize(i.ray);
+
+                float4 color = float4(0.0, 0.0, 0.0, 0.0);
+                
+                hitInfo hit;
+                if (RayMarch(ro, rd, depth, hit)){
+                    color.w = 1.0;
+
+                    color.rgb += Shading(hit);
+                }
 
                 // BLENDING
                 #ifdef RM_BLEND_ON_SCENE
