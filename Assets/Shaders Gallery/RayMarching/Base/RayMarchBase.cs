@@ -9,7 +9,7 @@ public class RayMarchBase : MonoBehaviour {
     private Shader _rayMarchShader;
 
 
-    [Header("Settings")]
+    [Header("Raymarch Settings")]
     [SerializeField]
     private bool _blendOnScene = true;
 
@@ -48,6 +48,26 @@ public class RayMarchBase : MonoBehaviour {
     private float _shadowsSoftness = 4f;
 
 
+    [Header("Ambient Occlusion")]
+    [SerializeField, Range(0f, 2f)]
+    private float _aoStep = 0.2f;
+
+    [SerializeField, Range(0f, 1f)]
+    private float _aoIntensity = 0.3f;
+
+    [SerializeField, Range(0, 10)]
+    private int _aoIterations = 3;
+
+
+    [Header("Ambient Light")]
+    [SerializeField]
+    private bool _useAmbMap;
+    [SerializeField]
+    private Cubemap _ambMap;
+    [SerializeField]
+    private Color _ambColor;
+
+
     private Material _renderMaterial;
     private RenderTexture _renderTexture;
     private Camera _currentCamera;
@@ -56,6 +76,7 @@ public class RayMarchBase : MonoBehaviour {
     LocalKeyword _useSoftShadowsKwd;
     LocalKeyword _blendOnSceneKwd;
     LocalKeyword _usePointLightKwd;
+    LocalKeyword _useAmbMapKwd;
 
     private void Start() {
         if (_rayMarchShader == null) {
@@ -71,6 +92,7 @@ public class RayMarchBase : MonoBehaviour {
         _useSoftShadowsKwd = new LocalKeyword(shader, "RM_SOFT_SHADOWS_ON");
         _blendOnSceneKwd   = new LocalKeyword(shader, "RM_BLEND_ON_SCENE");
         _usePointLightKwd = new LocalKeyword(shader, "RM_POINT_LIGHT_ON");
+        _useAmbMapKwd = new LocalKeyword(shader, "RM_AMB_MAP_ON");
     }
 
     //[ImageEffectOpaque]
@@ -99,11 +121,16 @@ public class RayMarchBase : MonoBehaviour {
         _renderMaterial.SetFloat("_ShadowsSoftness", _shadowsSoftness);
         _renderMaterial.SetFloat("_ShadowsSoftness", _shadowsSoftness);
         _renderMaterial.SetVector("_ShadowsDistance", _shadowsDistance);
+        _renderMaterial.SetFloat("_AoStep", _aoStep);
+        _renderMaterial.SetFloat("_AoInt", _aoIntensity);
+        _renderMaterial.SetFloat("_AoIterations", _aoIterations);
+        _renderMaterial.SetVector("_AmbCol", _ambColor);
 
         // set keywords
         _renderMaterial.SetKeyword(_useSoftShadowsKwd, _useSoftShadows);
         _renderMaterial.SetKeyword(_blendOnSceneKwd, _blendOnScene);
         _renderMaterial.SetKeyword(_usePointLightKwd, _usePointLight);
+        _renderMaterial.SetKeyword(_useAmbMapKwd, _useAmbMap);
 
 
         CustomGraphicsBlit(source, destination, _renderMaterial, 0);

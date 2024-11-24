@@ -15,6 +15,7 @@ Shader "RayMarching/RayMarcherBase" {
             #pragma multi_compile __ RM_SOFT_SHADOWS_ON 
             #pragma multi_compile __ RM_BLEND_ON_SCENE 
             #pragma multi_compile __ RM_POINT_LIGHT_ON
+            #pragma multi_compile __ RM_AMB_MAP_ON
 
             #include "UnityCG.cginc"
             #include "DistanceFunctions.cginc"
@@ -28,18 +29,23 @@ Shader "RayMarching/RayMarcherBase" {
             uniform float4x4 _CameraToWorldMatrix;
 
             // other values
-            uniform float  _MaxDist;
-            uniform int    _MaxSteps;
-            uniform float  _SurfDist;
-            uniform float3 _DirLightDir;
-            uniform float4 _DirLightCol;
-            uniform float  _DirLightInt;
-            uniform float3 _PntLightPos;
-            uniform float4 _PntLightCol;
-            uniform float  _PntLightInt;
-            uniform float  _ShadowsIntensity;
-            uniform float  _ShadowsSoftness;
-            uniform float2 _ShadowsDistance;
+            uniform float       _MaxDist;
+            uniform int         _MaxSteps;
+            uniform float       _SurfDist;
+            uniform float3      _DirLightDir;
+            uniform float4      _DirLightCol;
+            uniform float       _DirLightInt;
+            uniform float3      _PntLightPos;
+            uniform float4      _PntLightCol;
+            uniform float       _PntLightInt;
+            uniform float       _ShadowsIntensity;
+            uniform float       _ShadowsSoftness;
+            uniform float2      _ShadowsDistance;
+            uniform float       _AoStep;
+            uniform float       _AoInt;
+            uniform int         _AoIterations;
+            uniform samplerCUBE _AmbMap;
+            uniform float4      _AmbCol;
 
             // depth texture
             uniform sampler2D _CameraDepthTexture;
@@ -70,7 +76,7 @@ Shader "RayMarching/RayMarcherBase" {
                 return d;
             }
 
-            float hardShadows(float3 ro, float3 rd, float mint, float maxt){
+            float HardShadows(float3 ro, float3 rd, float mint, float maxt){
                 float t = mint;
                 while(t < maxt){
                     float h = GetDist(ro + rd * t);
@@ -80,7 +86,7 @@ Shader "RayMarching/RayMarcherBase" {
                 return 1.0;
             }
 
-            float softShadows(float3 ro, float3 rd, float mint, float maxt, float k){
+            float SoftShadows(float3 ro, float3 rd, float mint, float maxt, float k){
                 float result = 1.0;
 
                 float t = mint;
@@ -91,6 +97,17 @@ Shader "RayMarching/RayMarcherBase" {
                     if(h < _SurfDist) return 0.0;
                 }
                 return result;
+            }
+
+            float AmbientOcclusion(float3 p, float3 n){
+                float step = _AoStep;
+                float ao = 0.0;
+                float dist;
+                for(int i = 1; i < _AoIterations; i++){
+                    dist = step * i;
+                    ao += max(0.0, (dist - GetDist(p + n * dist)) / dist);
+                }
+                return 1.0 - ao * _AoInt;
             }
 
             float3 GetNormal(float3 pnt) {
@@ -151,7 +168,7 @@ Shader "RayMarching/RayMarcherBase" {
                 // LIGHT
                 float3 kd = float3(0.7, 0.9, 1.0);
                 float3 ks = float3(1.0, 1.0, 1.0);
-                float3 ka = float3(0.0, 0.0, 0.02);
+                float3 ka = _AmbCol.rgb;
                 float  q  = 500.0;
 
                 #ifdef RM_POINT_LIGHT_ON
@@ -169,14 +186,14 @@ Shader "RayMarching/RayMarcherBase" {
                 float3 H = normalize(L + V);
 
                 // Blinn-Phong BRDF
-                color.rgb = (kd * max(0.0, dot(N, L) * 0.5 + 0.5) + ks * pow(max(0.0, dot(N, H) * 0.5 + 0.5), q)) * lightColor;
+                color.rgb = (kd * max(0.0, dot(N, L) * 0.5 + 0.5) + ks * pow(max(0.0, dot(N, H) * 0.5 + 0.5), q)) * lightColor + ka;
 
                 // SHADOWS
                 float shadows;
                 #ifdef RM_SOFT_SHADOWS_ON
-                    shadows = softShadows(pnt, L, _ShadowsDistance.x, _ShadowsDistance.y, _ShadowsSoftness) * 0.5 + 0.5;
+                    shadows = SoftShadows(pnt, L, _ShadowsDistance.x, _ShadowsDistance.y, _ShadowsSoftness) * 0.5 + 0.5;
                 #else
-                    shadows = hardShadows(pnt, L, _ShadowsDistance.x, _ShadowsDistance.y) * 0.5 + 0.5;
+                    shadows = HardShadows(pnt, L, _ShadowsDistance.x, _ShadowsDistance.y) * 0.5 + 0.5;
                 #endif
                 shadows = max(0.0, pow(shadows, _ShadowsIntensity));
                 color.rgb *= shadows;
@@ -186,6 +203,9 @@ Shader "RayMarching/RayMarcherBase" {
                 float density = 0.03;
                 float fog = pow(2, -pow((dist * density), 2));
                 color.rgb = lerp(fogColor, color, fog);*/
+
+                // AMBIENT OCCLUSION
+                color.rgb *= AmbientOcclusion(pnt, N);
 
                 // BLENDING
                 #ifdef RM_BLEND_ON_SCENE
