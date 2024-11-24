@@ -1,4 +1,17 @@
-﻿// DISTANCE FUNCTIONS //
+﻿// WORKING WITH THESE STRUCTS
+
+//struct material{
+//    float3 kd;
+//    float3 ks;
+//    float q;  // for Blinn-Phong specular
+//};
+//
+//struct hitInfo{
+//    float d;
+//    material mat;
+//};
+
+// DISTANCE FUNCTIONS //
 
 float sdPlane(float3 p, float3 n){
     return dot(p, n);
@@ -69,8 +82,16 @@ float sdFractal(float3 pos){
 // BOOLEAN OPERATORS //
 
 // Union
-float opU(float d1, float d2){
-	return min(d1, d2);
+hitInfo opU(hitInfo d1, hitInfo d2){
+	float d = min(d1.d, d2.d);
+    bool first = (d == d1.d);
+
+    hitInfo res;
+    res.d = d;
+    res.mat.kd = first? d1.mat.kd : d2.mat.kd;
+    res.mat.ks = first? d1.mat.ks : d2.mat.ks;
+    res.mat.q = first? d1.mat.q : d2.mat.q;
+    return res; 
 }
 
 // Subtraction

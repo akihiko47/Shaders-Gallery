@@ -23,7 +23,6 @@ Shader "RayMarching/RayMarcherBase" {
             #pragma multi_compile __ RM_AMB_MAP_ON
 
             #include "UnityCG.cginc"
-            #include "DistanceFunctions.cginc"
 
             // rendered scene texture
             sampler2D _MainTex;
@@ -66,24 +65,47 @@ Shader "RayMarching/RayMarcherBase" {
                 float2 uvOriginal :TEXCOORD01;
                 float3 ray: TEXCOORD2;
             };
+
+            struct material {
+                float3 kd;
+                float3 ks;
+                float q;  // for Blinn-Phong specular
+            };
+
+            struct hitInfo {
+                float d;
+                material mat;
+            };
+
+            #include "DistanceFunctions.cginc"
             
-            float GetDist(float3 p) {
-                float dS = sdSphere(p - float3(0.0, 1.2, 0.0), 1.5);
+            hitInfo GetDist(float3 p) { 
+                hitInfo dS;
+                dS.d = sdSphere(p - float3(0.0, 1.5, 0.0), 1.0);
 
-                float dB = sdRoundBox(p - float3(0.0, 1.2, 0.0), float3(1.0, 1.0, 1.0), 0.2);
-                dB = opSS(dS, dB, 0.1);
+                hitInfo dB;
+                dB.d = sdRoundBox(p - float3(0.0, 1.5, 0.0), float3(1.0, 1.0, 1.0), 0.5);
+                dB.d = opSS(dS.d, dB.d, 1.7);
+                dB.mat.kd = float3(1.0, 0.0, 0.0);
+                dB.mat.ks = float3(1.0, 1.0, 1.0);
+                dB.mat.q  = 100.0;
 
-                float dP = sdPlane(p, normalize(float3(0.0, 1.0, 0.0)));
+                hitInfo dP;
+                dP.d = sdPlane(p, normalize(float3(0.0, 1.0, 0.0)));
                 // more operations in "DistanceFunctions.cginc"
+                dP.mat.kd = float3(1.0, 1.0, 1.0);
+                dP.mat.ks = float3(1.0, 1.0, 1.0);
+                dP.mat.q = 500.0;
 
-                float d = opU(dB, dP);
-                return d;
+                hitInfo res; 
+                res = opU(dB, dP);
+                return res;
             }
 
             float HardShadows(float3 ro, float3 rd, float mint, float maxt){
                 float t = mint;
                 while(t < maxt){
-                    float h = GetDist(ro + rd * t);
+                    float h = GetDist(ro + rd * t).d;
                     t += h;
                     if(h < _SurfDist) return 0.0;
                 }
@@ -95,7 +117,7 @@ Shader "RayMarching/RayMarcherBase" {
 
                 float t = mint;
                 while(t < maxt){
-                    float h = GetDist(ro + rd * t);
+                    float h = GetDist(ro + rd * t).d; 
                     t += h;
                     result = min(result, k * h / t);
                     if(h < _SurfDist) return 0.0;
@@ -109,18 +131,18 @@ Shader "RayMarching/RayMarcherBase" {
                 float dist;
                 for(int i = 1; i < _AoIterations; i++){
                     dist = step * i;
-                    ao += max(0.0, (dist - GetDist(p + n * dist)) / dist);
+                    ao += max(0.0, (dist - GetDist(p + n * dist).d) / dist);
                 }
                 return 1.0 - ao * _AoInt;
             }
 
             float3 GetNormal(float3 pnt) {
-                float d = GetDist(pnt);
+                float d = GetDist(pnt).d;
                 float2 e = float2(0.001, 0.0);
 
-                float3 n = d - float3(GetDist(pnt - e.xyy),
-                                      GetDist(pnt - e.yxy),
-                                      GetDist(pnt - e.yyx));
+                float3 n = d - float3(GetDist(pnt - e.xyy).d,
+                                      GetDist(pnt - e.yxy).d,
+                                      GetDist(pnt - e.yyx).d);
 
                 return normalize(n);
             }
@@ -151,10 +173,12 @@ Shader "RayMarching/RayMarcherBase" {
                 float3 rayDir = normalize(i.ray);   
 
                 float OriginDistance = 0.0;
+                hitInfo hit;
 
                 for (int n = 0; n < _MaxSteps; n++) {
                     float3 pnt = rayOrigin + rayDir * OriginDistance;
-                    float deltaDistance = GetDist(pnt);
+                    hit = GetDist(pnt);
+                    float deltaDistance = hit.d;
                     OriginDistance += deltaDistance;
                     if (OriginDistance < _SurfDist || OriginDistance > _MaxDist) break;
                     #ifdef RM_BLEND_ON_SCENE
@@ -177,9 +201,9 @@ Shader "RayMarching/RayMarcherBase" {
                 float3 N = GetNormal(pnt);
                 float3 V = normalize(_CameraWorldPos - pnt);
 
-                float  q = 500.0;
-                float3 kd = float3(0.7, 0.9, 1.0);
-                float3 ks = float3(1.0, 1.0, 1.0);
+                float  q  = hit.mat.q;
+                float3 kd = hit.mat.kd;
+                float3 ks = hit.mat.ks;
                 #ifdef RM_AMB_MAP_ON
                     float3 ka = max(0, ShadeSH9(float4(N, 1.0)));
                 #else
@@ -199,7 +223,7 @@ Shader "RayMarching/RayMarcherBase" {
                 float3 H = normalize(L + V);
 
                 // Blinn-Phong BRDF
-                color.rgb = (kd * max(0.0, dot(N, L) * 0.5 + 0.5) + ks * pow(max(0.0, dot(N, H) * 0.5 + 0.5), q)) * lightColor + ka;
+                color.rgb = (kd * max(0.0, dot(N, L) * 0.5 + 0.5) + ks * pow(max(0.0, dot(N, H)), q)) * lightColor + ka;
 
                 // SHADOWS
                 float shadows;
