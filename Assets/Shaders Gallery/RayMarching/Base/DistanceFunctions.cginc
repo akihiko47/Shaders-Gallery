@@ -3,7 +3,9 @@
 //struct material{
 //    float3 kd;
 //    float3 ks;
-//    float q;  // for Blinn-Phong specular
+//    float q;            // for Blinn-Phong specular
+//    float  reflInt;     // for true reflections
+//    float  ambReflInt;  // for cubemap reflections
 //};
 //
 //struct hitInfo{
@@ -81,10 +83,13 @@ float sdFractal(float3 pos){
 
 // BOOLEAN OPERATORS //
 material BlendMaterials(material mat1, material mat2, float h){
+    h = saturate(h);
     material mat;
-    mat.kd = lerp(mat1.kd, mat2.kd, h);
-    mat.ks = lerp(mat1.ks, mat2.ks, h);
-    mat.q  = lerp(mat1.q,  mat2.q,  h);
+    mat.kd         = lerp(mat1.kd,          mat2.kd,          h);
+    mat.ks         = lerp(mat1.ks,          mat2.ks,          h);
+    mat.q          = lerp(mat1.q,           mat2.q,           h);
+    mat.reflInt    = lerp(mat1.reflInt,     mat2.reflInt,     h);
+    mat.ambReflInt = lerp(mat1.ambReflInt,  mat2.ambReflInt,  h);
     return mat;
 }
 

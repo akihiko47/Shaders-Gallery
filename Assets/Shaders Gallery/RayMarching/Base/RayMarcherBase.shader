@@ -49,6 +49,8 @@ Shader "RayMarching/RayMarcherBase" {
             uniform float       _AoInt;
             uniform int         _AoIterations;
             uniform float4      _AmbCol;
+            uniform samplerCUBE _ReflMap;
+            uniform float       _ReflMaxDist;
 
             // depth texture
             uniform sampler2D _CameraDepthTexture;
@@ -69,7 +71,9 @@ Shader "RayMarching/RayMarcherBase" {
             struct material {
                 float3 kd;
                 float3 ks;
-                float q;  // for Blinn-Phong specular
+                float  q;           // for Blinn-Phong specular
+                float  reflInt;     // for true reflections
+                float  ambReflInt;  // for cubemap reflections
             };
 
             struct hitInfo {
@@ -79,28 +83,40 @@ Shader "RayMarching/RayMarcherBase" {
             };
 
             #include "DistanceFunctions.cginc"
+
+            material DefaultMaterial(){
+                material res;
+                res.kd         = 1.0;
+                res.ks         = 1.0;
+                res.q          = 100.0;
+                res.reflInt    = 0.0;
+                res.ambReflInt = 0.0;
+                return res;
+            }
             
             hitInfo GetDist(float3 p) { 
                 hitInfo dS;
-                dS.d = sdSphere(p - float3(1.5, 1.2, 0.0), 1.0);
+                dS.d = sdSphere(p - float3(sin(_Time.y) * 3.0, 1.2, 0.0), 1.0);
+                dS.mat = DefaultMaterial();
                 dS.mat.kd = float3(0.0, 0.0, 1.0);
                 dS.mat.ks = float3(1.0, 1.0, 1.0);
                 dS.mat.q = 5000.0;
+                dS.mat.reflInt = 0.1;
+                dS.mat.ambReflInt = 0.05;
 
                 hitInfo dB;
                 dB.d = sdRoundBox(p - float3(0.0, 1.2, 0.0), float3(1.0, 1.0, 1.0), 0.2);
+                dB.mat = DefaultMaterial();
                 dB.mat.kd = float3(1.0, 0.0, 0.0);
-                dB.mat.ks = float3(1.0, 1.0, 1.0);
+                dB.mat.ks = float3(1.0, 1.0, 1.0); 
                 dB.mat.q  = 10.0;
 
-                dB = opUS(dS, dB, 0.5);
+                dB = opUS(dS, dB, 1.0);
 
                 hitInfo dP;
                 dP.d = sdPlane(p, normalize(float3(0.0, 1.0, 0.0)));
-                // more operations in "DistanceFunctions.cginc"
-                dP.mat.kd = float3(1.0, 1.0, 1.0);
-                dP.mat.ks = float3(1.0, 1.0, 1.0);
-                dP.mat.q = 100.0;
+                dP.mat = DefaultMaterial();
+                dP.mat.reflInt = 0.3;
 
                 hitInfo res; 
                 res = opU(dB, dP);
@@ -241,6 +257,9 @@ Shader "RayMarching/RayMarcherBase" {
                 // AMBIENT OCCLUSION
                 color.rgb *= AmbientOcclusion(hit.pnt, N);
 
+                // CUBEMAP REFLECTIONS
+                color.rgb += texCUBE(_ReflMap, N).rgb * hit.mat.ambReflInt;
+
                 return color;
             }
 
@@ -260,6 +279,12 @@ Shader "RayMarching/RayMarcherBase" {
                     color.w = 1.0;
 
                     color.rgb += Shading(hit);
+
+                    float3 N = GetNormal(hit.pnt);
+                    hitInfo hit2;
+                    if(RayMarch(hit.pnt, N, _ReflMaxDist, hit2)){
+                        color.rgb += Shading(hit2) * hit.mat.reflInt; 
+                    }
                 }
 
                 // BLENDING

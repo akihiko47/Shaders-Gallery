@@ -66,6 +66,13 @@ public class RayMarchBase : MonoBehaviour {
     private Color _ambColor;
 
 
+    [Header("Reflections")]
+    [SerializeField]
+    private Cubemap _refelctionsCubelMap;
+    [SerializeField, Min(0f)]
+    private float _reflectionsMaxDistance = 100f;
+
+
     private Material _renderMaterial;
     private RenderTexture _renderTexture;
     private Camera _currentCamera;
@@ -123,6 +130,8 @@ public class RayMarchBase : MonoBehaviour {
         _renderMaterial.SetFloat("_AoInt", _aoIntensity);
         _renderMaterial.SetFloat("_AoIterations", _aoIterations);
         _renderMaterial.SetVector("_AmbCol", _ambColor);
+        _renderMaterial.SetTexture("_ReflMap", _refelctionsCubelMap);
+        _renderMaterial.SetFloat("_ReflMaxDist", _reflectionsMaxDistance);
 
         // set keywords
         _renderMaterial.SetKeyword(_useSoftShadowsKwd, _useSoftShadows);
