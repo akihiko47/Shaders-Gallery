@@ -71,6 +71,8 @@ public class RayMarchBase : MonoBehaviour {
     private Cubemap _refelctionsCubelMap;
     [SerializeField, Min(0f)]
     private float _reflectionsMaxDistance = 100f;
+    [SerializeField, Range(0, 3)]
+    private int _refectionsIterations = 1;
 
 
     private Material _renderMaterial;
@@ -132,6 +134,7 @@ public class RayMarchBase : MonoBehaviour {
         _renderMaterial.SetVector("_AmbCol", _ambColor);
         _renderMaterial.SetTexture("_ReflMap", _refelctionsCubelMap);
         _renderMaterial.SetFloat("_ReflMaxDist", _reflectionsMaxDistance);
+        _renderMaterial.SetFloat("_MaxRefl", _refectionsIterations);
 
         // set keywords
         _renderMaterial.SetKeyword(_useSoftShadowsKwd, _useSoftShadows);

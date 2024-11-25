@@ -2661,6 +2661,7 @@ MonoBehaviour:
   _ambColor: {r: 0, g: 0.07924521, b: 0.07433994, a: 1}
   _refelctionsCubelMap: {fileID: 8900000, guid: 15941f70fce71784da1321794120ea6a, type: 3}
   _reflectionsMaxDistance: 100
+  _refectionsIterations: 2
 --- !u!1 &973590622
 GameObject:
   m_ObjectHideFlags: 0

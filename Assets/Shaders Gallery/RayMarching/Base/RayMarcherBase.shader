@@ -51,6 +51,7 @@ Shader "RayMarching/RayMarcherBase" {
             uniform float4      _AmbCol;
             uniform samplerCUBE _ReflMap;
             uniform float       _ReflMaxDist;
+            uniform int         _MaxRefl;
 
             // depth texture
             uniform sampler2D _CameraDepthTexture;
@@ -99,7 +100,6 @@ Shader "RayMarching/RayMarcherBase" {
                 dS.d = sdSphere(p - float3(sin(_Time.y) * 3.0, 1.2, 0.0), 1.0);
                 dS.mat = DefaultMaterial();
                 dS.mat.kd = float3(0.0, 0.0, 1.0);
-                dS.mat.ks = float3(1.0, 1.0, 1.0);
                 dS.mat.q = 5000.0;
                 dS.mat.reflInt = 0.1;
                 dS.mat.ambReflInt = 0.05;
@@ -108,7 +108,6 @@ Shader "RayMarching/RayMarcherBase" {
                 dB.d = sdRoundBox(p - float3(0.0, 1.2, 0.0), float3(1.0, 1.0, 1.0), 0.2);
                 dB.mat = DefaultMaterial();
                 dB.mat.kd = float3(1.0, 0.0, 0.0);
-                dB.mat.ks = float3(1.0, 1.0, 1.0); 
                 dB.mat.q  = 10.0;
 
                 dB = opUS(dS, dB, 1.0);
@@ -117,9 +116,19 @@ Shader "RayMarching/RayMarcherBase" {
                 dP.d = sdPlane(p, normalize(float3(0.0, 1.0, 0.0)));
                 dP.mat = DefaultMaterial();
                 dP.mat.reflInt = 0.3;
+                dP.mat.ambReflInt = 0.0;
+
+                hitInfo dT;
+                dT.d = sdTorus(p - float3(0.0, 5.0 ,0.0), 2.0, 0.9);
+                dT.mat = DefaultMaterial();
+                dT.mat.kd = float3(0.0, 0.5, 0.0);
+                dT.mat.q = 5000.0;
+                dT.mat.reflInt = 0.1;
+                dT.mat.ambReflInt = 0.05;
 
                 hitInfo res; 
-                res = opU(dB, dP);
+                res = opU(dB,  dP);
+                res = opU(res, dT);
                 return res;
             }
 
@@ -206,11 +215,10 @@ Shader "RayMarching/RayMarcherBase" {
                 return false;
             }
 
-            float3 Shading(hitInfo hit){
+            float3 Shading(hitInfo hit, float3 N){
                 float3 color = 0.0;
 
                 // LIGHT
-                float3 N = GetNormal(hit.pnt);
                 float3 V = normalize(_CameraWorldPos - hit.pnt);
 
                 #ifdef RM_POINT_LIGHT_ON
@@ -257,9 +265,6 @@ Shader "RayMarching/RayMarcherBase" {
                 // AMBIENT OCCLUSION
                 color.rgb *= AmbientOcclusion(hit.pnt, N);
 
-                // CUBEMAP REFLECTIONS
-                color.rgb += texCUBE(_ReflMap, N).rgb * hit.mat.ambReflInt;
-
                 return color;
             }
 
@@ -278,13 +283,43 @@ Shader "RayMarching/RayMarcherBase" {
                 if (RayMarch(ro, rd, depth, hit)){
                     color.w = 1.0;
 
-                    color.rgb += Shading(hit);
-
                     float3 N = GetNormal(hit.pnt);
+                    float3 R = normalize(reflect(rd, N));
+                    color.rgb += Shading(hit, N);
+
+                    // CUBEMAP REFLECTIONS
+                    color.rgb += texCUBE(_ReflMap, R).rgb * hit.mat.ambReflInt;
+
+                    // REFLECTION
                     hitInfo hit2;
-                    if(RayMarch(hit.pnt, N, _ReflMaxDist, hit2)){
-                        color.rgb += Shading(hit2) * hit.mat.reflInt; 
+                    if(RayMarch(hit.pnt + R * 0.01, R, _ReflMaxDist, hit2) && _MaxRefl >= 1){
+                        float3 N2 = GetNormal(hit2.pnt);
+                        float3 R2 = normalize(reflect(R, N2));
+
+                        // TRUE REFLECTIONS 1
+                        color.rgb += Shading(hit2, N2) * hit.mat.reflInt; 
+
+                        // REFLECTION
+                        hitInfo hit3;
+                        if(RayMarch(hit2.pnt + R2 * 0.01, R2, _ReflMaxDist, hit3) && _MaxRefl >= 2){
+                            float3 N3 = GetNormal(hit3.pnt);
+                            float3 R3 = normalize(reflect(R2, N3));
+
+                            // TRUE REFLECTIONS 2 
+                            color.rgb += Shading(hit3, N3) * hit2.mat.reflInt * hit.mat.reflInt;
+
+                            // REFLECTION
+                            hitInfo hit4;
+                            if(RayMarch(hit3.pnt + R3 * 0.01, R3, _ReflMaxDist, hit4) && _MaxRefl >= 3){
+                                float3 N4 = GetNormal(hit4.pnt);
+
+                                // TRUE REFLECTIONS 3
+                                color.rgb += Shading(hit4, N4) * hit3.mat.reflInt * hit2.mat.reflInt * hit.mat.reflInt;
+                            }
+                        }
                     }
+
+                    
                 }
 
                 // BLENDING
