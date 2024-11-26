@@ -84,8 +84,14 @@ public class RayMarchVolume : MonoBehaviour {
     [SerializeField, Min(0)]
     private int _integrationSteps = 100;
 
-    [SerializeField, Range(0f, 1f)]
+    [SerializeField, Min(0)]
+    private int _lightIntegrationSteps = 100;
+
+    [SerializeField, Min(0f)]
     private float _absorbtion = 0.2f;
+
+    [SerializeField]
+    private Texture2D _mainVolumeTexture;
 
 
     private Material _renderMaterial;
@@ -153,7 +159,9 @@ public class RayMarchVolume : MonoBehaviour {
         _renderMaterial.SetVector("_BoundsMin", _boundingBox.position - _boundingBox.localScale / 2f);
         _renderMaterial.SetVector("_BoundsMax", _boundingBox.position + _boundingBox.localScale / 2f);
         _renderMaterial.SetInt("_IntegrationSteps", _integrationSteps);
+        _renderMaterial.SetInt("_LightIntegrationSteps", _lightIntegrationSteps);
         _renderMaterial.SetFloat("_VolAbsorption", _absorbtion);
+        _renderMaterial.SetTexture("_MainVolTex", _refelctionsCubelMap);
 
         // set keywords
         _renderMaterial.SetKeyword(_useSoftShadowsKwd, _useSoftShadows);

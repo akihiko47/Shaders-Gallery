@@ -57,7 +57,9 @@ Shader "RayMarching/RayMarcherVolume" {
             uniform float3 _BoundsMin;
             uniform float3 _BoundsMax;
             uniform int    _IntegrationSteps;
+            uniform int    _LightIntegrationSteps;
             uniform float  _VolAbsorption;
+            uniform sampler2D _MainVolTex;
 
             // depth texture
             uniform sampler2D _CameraDepthTexture;
@@ -211,6 +213,59 @@ Shader "RayMarching/RayMarcherVolume" {
                 return false;
             }
 
+            // By IQ
+            float3 hash(float3 p) // replace this by something better
+            {
+                p = float3(dot(p, float3(127.1, 311.7, 74.7)),
+                           dot(p, float3(269.5, 183.3, 246.1)),
+                           dot(p, float3(113.5, 271.9, 124.6)));
+                p = -1.0 + 2.0 * frac(sin(p) * 43758.5453123);
+
+                // ROTATION PART
+                //float t = _Time.y * 1.0;
+                //float2x2 m = float2x2(cos(t), -sin(t), sin(t), cos(t));
+                //p.xz = mul(m, p.xz);
+
+                return p;
+            }
+
+            // By IQ
+            float noise(float3 p){
+                float3 i = floor(p);
+                float3 f = frac(p);
+
+                float3 u = f * f * (3.0 - 2.0 * f);
+
+                return lerp(lerp(lerp(dot(hash(i + float3(0.0, 0.0, 0.0)), f - float3(0.0, 0.0, 0.0)),
+                            dot(hash(i + float3(1.0, 0.0, 0.0)), f - float3(1.0, 0.0, 0.0)), u.x),
+                            lerp(dot(hash(i + float3(0.0, 1.0, 0.0)), f - float3(0.0, 1.0, 0.0)),
+                            dot(hash(i + float3(1.0, 1.0, 0.0)), f - float3(1.0, 1.0, 0.0)), u.x), u.y),
+                            lerp(lerp(dot(hash(i + float3(0.0, 0.0, 1.0)), f - float3(0.0, 0.0, 1.0)),
+                            dot(hash(i + float3(1.0, 0.0, 1.0)), f - float3(1.0, 0.0, 1.0)), u.x),
+                            lerp(dot(hash(i + float3(0.0, 1.0, 1.0)), f - float3(0.0, 1.0, 1.0)),
+                            dot(hash(i + float3(1.0, 1.0, 1.0)), f - float3(1.0, 1.0, 1.0)), u.x), u.y), u.z);
+            }
+
+            #define OCTAVES 2
+            float fbm(float3 uv){
+
+                float value = 0.0;
+                float amplitude = 0.5;
+
+                for(int i = 0; i < OCTAVES; i++){
+                    value += amplitude * (noise(uv) * 0.5 + 0.5);
+                    uv *= 2.0;
+                    amplitude *= 0.5;
+                }
+                return value;
+            }
+
+
+            float SampleDensity(float3 pnt){
+                float nse = noise(pnt) * 0.5 + 0.5;
+                return nse;
+            }
+
             float3 Shading(hitInfo hit, float3 N){
                 float3 color = 0.0;
 
@@ -270,31 +325,54 @@ Shader "RayMarching/RayMarcherVolume" {
                 float depth = LinearEyeDepth(tex2D(_CameraDepthTexture, i.uvOriginal).r);
                 depth *= length(i.ray);  // convert depth to distance
 
+                // RAY MARCHING
                 float3 ro = _CameraWorldPos;
                 float3 rd = normalize(i.ray);
 
+                // STAERT COLOR
                 float4 color = float4(0.0, 0.0, 0.0, 0.0);
                 
+                // BOUNDING BOX
                 float2 rayBoxInfo = RayBoxDist(_BoundsMin, _BoundsMax, ro, rd);
                 float dstToBox = rayBoxInfo.x;
                 float dstInBox = rayBoxInfo.y;
                 bool rayInBox = dstInBox > 0 && dstToBox < depth;
 
                 if(rayInBox){
-                    color.w = 1.0;
-
-                    
                     float dt = dstInBox / _IntegrationSteps;
                     float dist = 0.0;
                     float maxDist = min(depth - dstToBox, dstInBox);
-                    float res = 0.0;
+
+                    float trans = 1.0;
+                    float totalDensity = 0.0;
+                    float lightEnergy = 0.0;
+                    float3 lightColor = 0.0;
+
                     while (dist < maxDist){
-                        res += _VolAbsorption * dt;
+                        float3 pnt = ro + rd * (dstToBox + dist);
+                        float pntDensity = SampleDensity(pnt) * dt * _VolAbsorption;
+                        totalDensity += pntDensity;
+                        trans *= exp(-pntDensity);
+
+                        //float3 L = normalize(_PntLightPos - pnt);
+                        float3 L = _DirLightDir;
+                        float maxDistL = RayBoxDist(_BoundsMin, _BoundsMax, pnt, L).y;
+                        float dtL = maxDistL / _LightIntegrationSteps;
+                        float distL = 0.0;
+                        float totalDensityL = 0.0;
+                        while(distL < maxDistL){ 
+                            float3 pntL = pnt + L * distL;
+                            float pntDensityL = SampleDensity(pntL);
+                            totalDensityL += pntDensityL * dtL * _VolAbsorption;
+                            distL += dtL;
+                        }
+                        float transL = exp(-totalDensityL);
+                        lightEnergy += transL * pntDensity * dt * trans;
+                        
                         dist += dt;
                     }
-                    res = exp(-res);
-                    color.w *= (1.0 - res);
-
+                    color.w = (1.0 - saturate(trans));
+                    color.rgb = lightEnergy;
                     
                     /*hitInfo hit;
                     if(RayMarch(ro, rd, dstToBox, dstToBox + dstInBox, depth, hit)){
