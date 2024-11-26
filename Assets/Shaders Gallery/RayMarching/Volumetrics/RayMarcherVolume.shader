@@ -1,4 +1,4 @@
-Shader "RayMarching/RayMarcherBase" {
+Shader "RayMarching/RayMarcherVolume" {
 
     Properties {
         _MainTex ("Texture", 2D) = "white" {}
@@ -83,7 +83,7 @@ Shader "RayMarching/RayMarcherBase" {
                 material mat;
             };
 
-            #include "DistanceFunctions.cginc"
+            #include "../Base/DistanceFunctions.cginc"
 
             material DefaultMaterial(){
                 material res;
@@ -94,32 +94,31 @@ Shader "RayMarching/RayMarcherBase" {
                 res.ambReflInt = 0.0;
                 return res;
             }
+
+            // from Sebastian Lague video
+            float2 RayBoxDist(float3 boundsMin, float3 boundsMax, float3 ro, float3 rd){
+                float3 t0 = (boundsMin - ro) / rd;
+                float3 t1 = (boundsMax - ro) / rd;
+                float3 tmin = min(t0, t1);
+                float3 tmax = max(t0, t1);
+
+                float dstA = max(max(tmin.x, tmin.y), tmin.z);
+                float dstB = min(min(tmax.x, tmax.y), tmax.z);
+
+                float dstToBox = max(0.0, dstA);
+                float dstInsideBox = max(0.0, dstB - dstToBox);
+                return float2(dstToBox, dstInsideBox);
+            }
             
             hitInfo GetDist(float3 p) { 
-                hitInfo dS;
-                dS.d = sdSphere(p - float3(sin(_Time.y) * 3.0, 1.2, 0.0), 1.0);
-                dS.mat = DefaultMaterial();
-                dS.mat.kd = float3(0.0, 0.0, 1.0);
-                dS.mat.q = 5000.0;
-                dS.mat.reflInt = 0.1;
-                dS.mat.ambReflInt = 0.05;
-
                 hitInfo dB;
-                dB.d = sdRoundBox(p - float3(0.0, 1.2, 0.0), float3(1.0, 1.0, 1.0), 0.2);
+                dB.d = sdRoundBox(p - float3(5.0, 1.2, 0.0), float3(1.0, 1.0, 1.0), 0.2);
                 dB.mat = DefaultMaterial();
                 dB.mat.kd = float3(1.0, 0.0, 0.0);
                 dB.mat.q  = 10.0;
 
-                dB = opUS(dS, dB, 1.0);
-
-                hitInfo dP;
-                dP.d = sdPlane(p, normalize(float3(0.0, 1.0, 0.0)));
-                dP.mat = DefaultMaterial();
-                dP.mat.reflInt = 0.3;
-                dP.mat.ambReflInt = 0.0;
-
                 hitInfo res; 
-                res = opU(dB,  dP);
+                res = dB;
                 return res;
             }
 
@@ -183,8 +182,8 @@ Shader "RayMarching/RayMarcherBase" {
                 return o;
             }
 
-            bool RayMarch(float3 ro, float3 rd, float depth, inout hitInfo hit){
-                float OriginDistance = _SurfDist;
+            bool RayMarch(float3 ro, float3 rd, float from, float to, float depth, inout hitInfo hit){
+                float OriginDistance = from;
 
                 for(int n = 0; n < _MaxSteps; n++){
                     float3 p = ro + rd * OriginDistance;
@@ -194,7 +193,7 @@ Shader "RayMarching/RayMarcherBase" {
                         hit.pnt = p;
                         return true;
                     }
-                    if(OriginDistance > _MaxDist){
+                    if(OriginDistance > to){
                         return false;
                     }
                     #ifdef RM_BLEND_ON_SCENE
@@ -270,47 +269,19 @@ Shader "RayMarching/RayMarcherBase" {
 
                 float4 color = float4(0.0, 0.0, 0.0, 0.0);
                 
-                hitInfo hit;
-                if (RayMarch(ro, rd, depth, hit)){
-                    color.w = 1.0;
+                float2 rayBoxInfo = RayBoxDist(float3(-5.0, -5.0, -5.0), float3(5.0, 5.0, 5.0), ro, rd);
+                float dstToBox = rayBoxInfo.x;
+                float dstInBox = rayBoxInfo.y;
+                bool rayInBox = dstInBox > 0 && dstToBox < depth;
 
-                    float3 N = GetNormal(hit.pnt);
-                    float3 R = normalize(reflect(rd, N));
-                    color.rgb += Shading(hit, N);
-
-                    // CUBEMAP REFLECTIONS
-                    color.rgb += texCUBE(_ReflMap, R).rgb * hit.mat.ambReflInt;
-
-                    // REFLECTION
-                    hitInfo hit2;
-                    if(RayMarch(hit.pnt + R * 0.01, R, _ReflMaxDist, hit2) && _MaxRefl >= 1){
-                        float3 N2 = GetNormal(hit2.pnt);
-                        float3 R2 = normalize(reflect(R, N2));
-
-                        // TRUE REFLECTIONS 1
-                        color.rgb += Shading(hit2, N2) * hit.mat.reflInt; 
-
-                        // REFLECTION
-                        hitInfo hit3;
-                        if(RayMarch(hit2.pnt + R2 * 0.01, R2, _ReflMaxDist, hit3) && _MaxRefl >= 2){
-                            float3 N3 = GetNormal(hit3.pnt);
-                            float3 R3 = normalize(reflect(R2, N3));
-
-                            // TRUE REFLECTIONS 2 
-                            color.rgb += Shading(hit3, N3) * hit2.mat.reflInt * hit.mat.reflInt;
-
-                            // REFLECTION
-                            hitInfo hit4;
-                            if(RayMarch(hit3.pnt + R3 * 0.01, R3, _ReflMaxDist, hit4) && _MaxRefl >= 3){
-                                float3 N4 = GetNormal(hit4.pnt);
-
-                                // TRUE REFLECTIONS 3
-                                color.rgb += Shading(hit4, N4) * hit3.mat.reflInt * hit2.mat.reflInt * hit.mat.reflInt;
-                            }
-                        }
+                if(rayInBox){
+                    color.w = 0.2;
+                    hitInfo hit;
+                    if(RayMarch(ro, rd, dstToBox, dstToBox + dstInBox, depth, hit)){
+                        color.w = 1.0;
+                        float3 N = GetNormal(hit.pnt);
+                        color.rgb += Shading(hit, N);
                     }
-
-                    
                 }
 
                 // BLENDING
