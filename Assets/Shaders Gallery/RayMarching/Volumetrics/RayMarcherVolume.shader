@@ -56,6 +56,8 @@ Shader "RayMarching/RayMarcherVolume" {
             // volumetric rendering
             uniform float3 _BoundsMin;
             uniform float3 _BoundsMax;
+            uniform int    _IntegrationSteps;
+            uniform float  _VolAbsorption;
 
             // depth texture
             uniform sampler2D _CameraDepthTexture;
@@ -279,13 +281,27 @@ Shader "RayMarching/RayMarcherVolume" {
                 bool rayInBox = dstInBox > 0 && dstToBox < depth;
 
                 if(rayInBox){
-                    color.w = 0.2;
-                    hitInfo hit;
+                    color.w = 1.0;
+
+                    
+                    float dt = dstInBox / _IntegrationSteps;
+                    float dist = 0.0;
+                    float maxDist = min(depth - dstToBox, dstInBox);
+                    float res = 0.0;
+                    while (dist < maxDist){
+                        res += _VolAbsorption * dt;
+                        dist += dt;
+                    }
+                    res = exp(-res);
+                    color.w *= (1.0 - res);
+
+                    
+                    /*hitInfo hit;
                     if(RayMarch(ro, rd, dstToBox, dstToBox + dstInBox, depth, hit)){
                         color.w = 1.0;
                         float3 N = GetNormal(hit.pnt);
                         color.rgb += Shading(hit, N);
-                    }
+                    }*/
                 }
 
                 // BLENDING

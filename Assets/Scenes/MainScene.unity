@@ -2663,6 +2663,8 @@ MonoBehaviour:
   _reflectionsMaxDistance: 100
   _refectionsIterations: 1
   _boundingBox: {fileID: 1756674537}
+  _integrationSteps: 5
+  _absorbtion: 0.259
 --- !u!1 &973590622
 GameObject:
   m_ObjectHideFlags: 0
@@ -4658,7 +4660,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1756674537}
   m_Layer: 0
-  m_Name: Bounding Box
+  m_Name: Volume Bounding Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4673,7 +4675,7 @@ Transform:
   m_GameObject: {fileID: 1756674536}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 5, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []

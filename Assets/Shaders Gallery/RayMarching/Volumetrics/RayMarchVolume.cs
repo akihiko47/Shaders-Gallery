@@ -81,6 +81,12 @@ public class RayMarchVolume : MonoBehaviour {
     [SerializeField]
     private Transform _boundingBox;
 
+    [SerializeField, Min(0)]
+    private int _integrationSteps = 100;
+
+    [SerializeField, Range(0f, 1f)]
+    private float _absorbtion = 0.2f;
+
 
     private Material _renderMaterial;
     private RenderTexture _renderTexture;
@@ -146,6 +152,8 @@ public class RayMarchVolume : MonoBehaviour {
         // volumetric rendering
         _renderMaterial.SetVector("_BoundsMin", _boundingBox.position - _boundingBox.localScale / 2f);
         _renderMaterial.SetVector("_BoundsMax", _boundingBox.position + _boundingBox.localScale / 2f);
+        _renderMaterial.SetInt("_IntegrationSteps", _integrationSteps);
+        _renderMaterial.SetFloat("_VolAbsorption", _absorbtion);
 
         // set keywords
         _renderMaterial.SetKeyword(_useSoftShadowsKwd, _useSoftShadows);
