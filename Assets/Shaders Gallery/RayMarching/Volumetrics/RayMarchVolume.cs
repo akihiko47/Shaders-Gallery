@@ -69,10 +69,17 @@ public class RayMarchVolume : MonoBehaviour {
     [Header("Reflections")]
     [SerializeField]
     private Cubemap _refelctionsCubelMap;
+
     [SerializeField, Min(0f)]
     private float _reflectionsMaxDistance = 100f;
+
     [SerializeField, Range(0, 3)]
     private int _refectionsIterations = 1;
+
+
+    [Header("Volumetric rendering")]
+    [SerializeField]
+    private Transform _boundingBox;
 
 
     private Material _renderMaterial;
@@ -135,6 +142,10 @@ public class RayMarchVolume : MonoBehaviour {
         _renderMaterial.SetTexture("_ReflMap", _refelctionsCubelMap);
         _renderMaterial.SetFloat("_ReflMaxDist", _reflectionsMaxDistance);
         _renderMaterial.SetFloat("_MaxRefl", _refectionsIterations);
+
+        // volumetric rendering
+        _renderMaterial.SetVector("_BoundsMin", _boundingBox.position - _boundingBox.localScale / 2f);
+        _renderMaterial.SetVector("_BoundsMax", _boundingBox.position + _boundingBox.localScale / 2f);
 
         // set keywords
         _renderMaterial.SetKeyword(_useSoftShadowsKwd, _useSoftShadows);

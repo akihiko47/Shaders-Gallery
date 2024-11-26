@@ -53,6 +53,10 @@ Shader "RayMarching/RayMarcherVolume" {
             uniform float       _ReflMaxDist;
             uniform int         _MaxRefl;
 
+            // volumetric rendering
+            uniform float3 _BoundsMin;
+            uniform float3 _BoundsMax;
+
             // depth texture
             uniform sampler2D _CameraDepthTexture;
 
@@ -269,7 +273,7 @@ Shader "RayMarching/RayMarcherVolume" {
 
                 float4 color = float4(0.0, 0.0, 0.0, 0.0);
                 
-                float2 rayBoxInfo = RayBoxDist(float3(-5.0, -5.0, -5.0), float3(5.0, 5.0, 5.0), ro, rd);
+                float2 rayBoxInfo = RayBoxDist(_BoundsMin, _BoundsMax, ro, rd);
                 float dstToBox = rayBoxInfo.x;
                 float dstInBox = rayBoxInfo.y;
                 bool rayInBox = dstInBox > 0 && dstToBox < depth;
