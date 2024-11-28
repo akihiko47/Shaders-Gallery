@@ -24,6 +24,8 @@ Shader "RayMarching/RayMarcherVolume" {
 
             #include "UnityCG.cginc"
 
+            #define PI 3.1415926535
+
             // rendered scene texture
             sampler2D _MainTex;
 
@@ -59,7 +61,8 @@ Shader "RayMarching/RayMarcherVolume" {
             uniform int    _IntegrationSteps;
             uniform int    _LightIntegrationSteps;
             uniform float  _VolAbsorption;
-            uniform sampler2D _MainVolTex;
+            uniform float  _VolLightAbsorption;
+            uniform float4 _VolCol2;
 
             // depth texture
             uniform sampler2D _CameraDepthTexture;
@@ -260,9 +263,13 @@ Shader "RayMarching/RayMarcherVolume" {
                 return value;
             }
 
+            float Scattering(float g, float costh){
+                return (1.0 / (4.0 * PI)) * ((1.0 - g * g) / pow(1.0 + g * g - 2.0 * g * costh, 1.5));
+            }
+
 
             float SampleDensity(float3 pnt){
-                float nse = noise(pnt) * 0.5 + 0.5;
+                float nse = pow(noise(pnt * 6.0) * 0.5 + 0.5, 2.5);
                 return nse;
             }
 
@@ -329,7 +336,7 @@ Shader "RayMarching/RayMarcherVolume" {
                 float3 ro = _CameraWorldPos;
                 float3 rd = normalize(i.ray);
 
-                // STAERT COLOR
+                // START COLOR
                 float4 color = float4(0.0, 0.0, 0.0, 0.0);
                 
                 // BOUNDING BOX
@@ -363,16 +370,16 @@ Shader "RayMarching/RayMarcherVolume" {
                         while(distL < maxDistL){ 
                             float3 pntL = pnt + L * distL;
                             float pntDensityL = SampleDensity(pntL);
-                            totalDensityL += pntDensityL * dtL * _VolAbsorption;
+                            totalDensityL += pntDensityL * dtL * _VolLightAbsorption;
                             distL += dtL;
                         }
                         float transL = exp(-totalDensityL);
-                        lightEnergy += transL * pntDensity * dt * trans;
+                        lightEnergy += transL * pntDensity * dt * trans * Scattering(0.9, 0.999099);
                         
                         dist += dt;
                     }
                     color.w = (1.0 - saturate(trans));
-                    color.rgb = lightEnergy;
+                    color.rgb = lightEnergy * _VolCol2 + _AmbCol.rgb;
                     
                     /*hitInfo hit;
                     if(RayMarch(ro, rd, dstToBox, dstToBox + dstInBox, depth, hit)){
